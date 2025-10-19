@@ -88,3 +88,12 @@ export function stringLength(min: number, max: number, fieldName: string): Valid
     return null;
   };
 }
+
+/**
+ * 검증 오류 객체를 생성합니다
+ */
+export function createValidationError(message: string): Error {
+  const error = new Error(message);
+  error.name = 'ValidationError';
+  return error;
+}
