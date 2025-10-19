@@ -140,11 +140,35 @@
   color: white;
 }
 
-.tagRed { composes: tag; background-color: var(--color-tag-red); }
-.tagOrange { composes: tag; background-color: var(--color-tag-orange); }
-.tagYellow { composes: tag; background-color: var(--color-tag-yellow); }
-.tagGreen { composes: tag; background-color: var(--color-tag-green); }
-.tagBlue { composes: tag; background-color: var(--color-tag-blue); }
-.tagPurple { composes: tag; background-color: var(--color-tag-purple); }
-.tagPink { composes: tag; background-color: var(--color-tag-pink); }
-.tagGray { composes: tag; background-color: var(--color-tag-gray); }
+.tagRed {
+  composes: tag;
+  background-color: var(--color-tag-red);
+}
+.tagOrange {
+  composes: tag;
+  background-color: var(--color-tag-orange);
+}
+.tagYellow {
+  composes: tag;
+  background-color: var(--color-tag-yellow);
+}
+.tagGreen {
+  composes: tag;
+  background-color: var(--color-tag-green);
+}
+.tagBlue {
+  composes: tag;
+  background-color: var(--color-tag-blue);
+}
+.tagPurple {
+  composes: tag;
+  background-color: var(--color-tag-purple);
+}
+.tagPink {
+  composes: tag;
+  background-color: var(--color-tag-pink);
+}
+.tagGray {
+  composes: tag;
+  background-color: var(--color-tag-gray);
+}

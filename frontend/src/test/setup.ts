@@ -1,11 +1,11 @@
-import '@testing-library/jest-dom'
-import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach, vi } from 'vitest';
 
 // 각 테스트 후 정리
 afterEach(() => {
-  cleanup()
-})
+  cleanup();
+});
 
 // Global 모킹
 Object.defineProperty(window, 'matchMedia', {
@@ -20,7 +20,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-})
+});
 
 // LocalStorage 모킹
 Object.defineProperty(window, 'localStorage', {
@@ -31,11 +31,11 @@ Object.defineProperty(window, 'localStorage', {
     clear: vi.fn(),
   },
   writable: true,
-})
+});
 
 // ResizeObserver 모킹
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
-}))
+}));

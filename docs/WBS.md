@@ -18,45 +18,44 @@
 **담당자**: 개발자
 **완료 조건**: 모든 설정 파일이 올바르게 동작하고 첫 테스트가 통과해야 함
 
-- **1.1.1 프로젝트 초기 설정** (0.5일)
+- **1.1.1 프로젝트 초기 설정** ✅ (0.5일)
   **커밋 단위 작업**:
-  1. `chore: Vite React TypeScript 프로젝트 초기 설정`
-     - [ ] `npm create vite@latest` 실행
-     - [ ] 기본 의존성 설치
-     - [ ] 첫 빌드 테스트
+  1. `feat: Tab-Nexus 프로젝트 초기 설정` ✅
+     - [x] `npm create vite@latest` 실행
+     - [x] 기본 의존성 설치
+     - [x] 첫 빌드 테스트
 
-  2. `chore: 프로젝트 폴더 구조 및 설정 파일 생성`
-     - [ ] 기본 폴더 구조 생성 (`src/components`, `src/types`, etc.)
-     - [ ] `.gitignore` 설정
-     - [ ] `README.md` 초기 작성
+  2. `chore: 프로젝트 폴더 구조 및 설정 파일 생성` ✅
+     - [x] 기본 폴더 구조 생성 (`src/components`, `src/types`, etc.)
+     - [x] `.gitignore` 설정
+     - [x] `README.md` 초기 작성
 
-  3. `chore: 개발 서버 실행 및 기본 동작 검증`
-     - [ ] `npm run dev` 정상 실행 확인
-     - [ ] 브라우저에서 기본 페이지 확인
-     - **검증**: `npm run dev` 실행 시 기본 페이지가 표시됨
+  3. `chore: 개발 서버 실행 및 기본 동작 검증` ✅
+     - [x] `npm run dev` 정상 실행 확인
+     - [x] 브라우저에서 기본 페이지 확인
+     - **검증**: `npm run dev` 실행 시 기본 페이지가 표시됨 ✅
 
-- **1.1.2 테스트 도구 설정** (1일)
+- **1.1.2 테스트 도구 설정** ✅ (1일)
   **커밋 단위 작업**:
-  1. `chore: Vitest 및 React Testing Library 설정`
-     - [ ] Vitest 의존성 설치
-     - [ ] `vitest.config.ts` 설정
-     - [ ] React Testing Library, Jest DOM 설치
-     - [ ] 첫 번째 테스트 파일 생성 및 실행
+  1. `chore: Vitest 및 React Testing Library 테스트 환경 설정` ✅
+     - [x] Vitest 의존성 설치
+     - [x] `vitest.config.ts` 설정
+     - [x] React Testing Library, Jest DOM 설치
+     - [x] 첫 번째 테스트 파일 생성 및 실행
 
-  2. `chore: Playwright E2E 테스트 환경 구성`
-     - [ ] Playwright 설치 및 초기 설정
-     - [ ] `playwright.config.ts` 구성
-     - [ ] 기본 E2E 테스트 케이스 작성
+  2. `docs: 개발 실수 방지 가이드 보완` ✅
+     - [x] npm cache 이슈 해결 방법 문서화
+     - [x] Vite asset import 문제 해결 가이드
+     - [x] Git workflow 모범 사례 추가
 
-  3. `chore: MSW 목킹 서버 설정`
-     - [ ] MSW 설치
-     - [ ] 기본 핸들러 설정
-     - [ ] 테스트 환경에서 MSW 활성화
+  3. `fix: Vite에서 올바른 asset import 방식으로 React 로고 경로 수정` ✅
+     - [x] ES module import 방식으로 변경
+     - [x] Copilot 리뷰 피드백 반영
 
-  4. `test: 기본 테스트 케이스 작성 및 검증`
-     - [ ] 컴포넌트 렌더링 테스트
-     - [ ] API 모킹 테스트
-     - **검증**: `npm test` 실행 시 모든 테스트가 통과됨
+  4. `test: 기본 테스트 케이스 작성 및 검증` ✅
+     - [x] 컴포넌트 렌더링 테스트 (한글)
+     - [x] React 로고 표시 테스트
+     - **검증**: `npm test` 실행 시 모든 테스트가 통과됨 ✅
 
 - **1.1.3 코드 품질 도구 설정** (0.5일)
   **커밋 단위 작업**:

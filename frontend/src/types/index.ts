@@ -32,15 +32,7 @@ export interface Tag {
   createdAt: Date;
 }
 
-export type TagColor =
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'blue'
-  | 'purple'
-  | 'pink'
-  | 'gray';
+export type TagColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'gray';
 
 export type ViewMode = 'grid' | 'list' | 'condensed' | 'grid-condensed';
 
