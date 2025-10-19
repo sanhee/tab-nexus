@@ -49,7 +49,7 @@ const DEBOUNCE_ERRORS = {
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   delay: number
-): T & { cancel: () => void; flush: () => void } {
+): DebouncedFunction<T> {
   if (typeof func !== 'function') {
     throw new Error(DEBOUNCE_ERRORS.INVALID_FUNCTION);
   }
@@ -90,7 +90,7 @@ export function debounce<T extends (...args: any[]) => any>(
 
       debounceMap.set(debouncedFunction, context);
     });
-  } as T & { cancel: () => void; flush: () => void };
+  } as DebouncedFunction<T>;
 
   // 캔슬 메서드
   debouncedFunction.cancel = () => {
@@ -249,24 +249,33 @@ export function createDebouncedFunction<T extends (...args: any[]) => any>(
   return debouncedFunction;
 }
 
+// 디바운스된 함수 타입 정의 (타입 안전성 향상)
+export interface DebouncedFunction<T extends (...args: any[]) => any> {
+  (...args: Parameters<T>): Promise<ReturnType<T>>;
+  cancel(): void;
+  flush(): void;
+}
+
 /**
  * 디바운스된 함수의 대기 중인 실행을 취소합니다
+ * 타입 안전성을 위해 DebouncedFunction 타입 사용
  *
  * @param debouncedFunc 디바운스된 함수
  */
-export function cancelDebounce(debouncedFunc: Function): void {
-  if (typeof debouncedFunc.cancel === 'function') {
-    debouncedFunc.cancel();
-  }
+export function cancelDebounce<T extends (...args: any[]) => any>(
+  debouncedFunc: DebouncedFunction<T>
+): void {
+  debouncedFunc.cancel();
 }
 
 /**
  * 디바운스된 함수를 즉시 실행합니다
+ * 타입 안전성을 위해 DebouncedFunction 타입 사용
  *
  * @param debouncedFunc 디바운스된 함수
  */
-export function flushDebounce(debouncedFunc: Function): void {
-  if (typeof debouncedFunc.flush === 'function') {
-    debouncedFunc.flush();
-  }
+export function flushDebounce<T extends (...args: any[]) => any>(
+  debouncedFunc: DebouncedFunction<T>
+): void {
+  debouncedFunc.flush();
 }
