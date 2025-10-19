@@ -1,0 +1,150 @@
+/* Component-specific CSS Modules */
+
+/* Button Components */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.buttonPrimary {
+  composes: button;
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.buttonSecondary {
+  composes: button;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.buttonSecondary:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+}
+
+.buttonSmall {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
+/* Card Components */
+.card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-hover);
+}
+
+.cardCompact {
+  composes: card;
+  padding: var(--space-md);
+}
+
+/* Grid Layouts */
+.grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.gridCols2 {
+  composes: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gridCols3 {
+  composes: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.gridCols4 {
+  composes: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive Grids */
+@media (max-width: 768px) {
+  .gridCols3,
+  .gridCols4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .gridCols2,
+  .gridCols3,
+  .gridCols4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Input Components */
+.input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+}
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.inputError:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+}
+
+/* Tag Components */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: white;
+}
+
+.tagRed { composes: tag; background-color: var(--color-tag-red); }
+.tagOrange { composes: tag; background-color: var(--color-tag-orange); }
+.tagYellow { composes: tag; background-color: var(--color-tag-yellow); }
+.tagGreen { composes: tag; background-color: var(--color-tag-green); }
+.tagBlue { composes: tag; background-color: var(--color-tag-blue); }
+.tagPurple { composes: tag; background-color: var(--color-tag-purple); }
+.tagPink { composes: tag; background-color: var(--color-tag-pink); }
+.tagGray { composes: tag; background-color: var(--color-tag-gray); }
