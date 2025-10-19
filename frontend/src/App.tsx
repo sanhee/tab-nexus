@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import reactLogo from './assets/react.svg'
 import './styles/globals.css'
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
           alt="Vite logo"
         />
         <img
-          src="src/assets/react.svg"
+          src={reactLogo}
           className="logo react"
           alt="React logo"
         />
