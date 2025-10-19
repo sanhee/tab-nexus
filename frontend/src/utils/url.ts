@@ -10,34 +10,66 @@
  * - 엄격한 타입 안전성
  */
 
-// URL 관련 상수 및 정규식 (성능 최적화를 위한 미리 컴파일)
+// 성능 최적화를 위한 미리 컴파일된 정규식 패턴
 const URL_PATTERNS = {
-  // HTTP/HTTPS 프로토콜만 허용
+  // HTTP/HTTPS 프로토콜 기본 검증 (대소문자 무관)
   basic: /^https?:\/\/.+/i,
-  // 도메인 추출용 (서브도메인 제거)
-  domain: /^(?:https?:\/\/)?(?:www\.)?([^\/\?#:]+)/i,
-  // 위험한 프로토콜 감지
-  dangerous: /^(?:javascript|data|file|vbscript):/i,
-  // 로컬 IP 주소
-  localIp: /^(?:127\.|192\.168\.|10\.|172\.(?:1[6-9]|2\d|3[01])\.|localhost)/i
+  // 위험한 프로토콜 감지 (보안 검증용)
+  dangerous: /^(?:javascript|data|file|vbscript|blob):/i,
+  // 로컬/사설 IP 주소 패턴 (RFC 1918, 루프백)
+  localIp: /^(?:127\.|192\.168\.|10\.|172\.(?:1[6-9]|2\d|3[01])\.|localhost$)/i,
+  // IPv4 주소 패턴
+  ipv4: /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
+  // 특수 프로토콜 (이메일, 전화 등)
+  specialProtocol: /^(?:mailto|tel|sms|fax):/i,
+  // 상대 경로 패턴
+  relativePath: /^\.{0,2}\//
 } as const;
 
-// 에러 메시지 상수화
+// 에러 메시지 상수화 (일관성 및 국제화 준비)
 const URL_ERRORS = {
   INVALID_URL: 'URL 형식이 올바르지 않습니다',
   UNSAFE_PROTOCOL: '안전하지 않은 프로토콜입니다',
   INVALID_DOMAIN: '유효하지 않은 도메인입니다',
-  URL_TOO_LONG: 'URL이 너무 깁니다'
+  URL_TOO_LONG: 'URL이 너무 깁니다',
+  INVALID_PORT: '유효하지 않은 포트 번호입니다'
 } as const;
 
-// URL 최대 길이 제한 (RFC 3986 권장사항)
-const MAX_URL_LENGTH = 8192;
-
-// 기본 포트 매핑
-const DEFAULT_PORTS = {
-  'http:': '80',
-  'https:': '443'
+// URL 관련 상수들 (성능 및 유지보수성 향상)
+const URL_CONSTANTS = {
+  // RFC 3986 권장 최대 길이
+  MAX_LENGTH: 8192,
+  // 포트 번호 유효 범위
+  MIN_PORT: 1,
+  MAX_PORT: 65535,
+  // 기본 포트 매핑
+  DEFAULT_PORTS: {
+    'http:': '80',
+    'https:': '443'
+  }
 } as const;
+
+// 유틸리티 헬퍼 함수들 (내부 로직 최적화)
+/**
+ * 포트 번호가 유효한 범위인지 검증합니다
+ * @param port 검증할 포트 문자열
+ * @returns 포트 번호가 유효한지 여부
+ */
+function isValidPort(port: string): boolean {
+  const portNumber = parseInt(port, 10);
+  return !isNaN(portNumber) &&
+         portNumber >= URL_CONSTANTS.MIN_PORT &&
+         portNumber <= URL_CONSTANTS.MAX_PORT;
+}
+
+/**
+ * 호스트명이 IP 주소인지 확인합니다
+ * @param hostname 확인할 호스트명
+ * @returns IP 주소인지 여부
+ */
+function isIpAddress(hostname: string): boolean {
+  return URL_PATTERNS.ipv4.test(hostname);
+}
 
 /**
  * URL이 유효한 HTTP/HTTPS 형식인지 검증합니다
@@ -65,12 +97,9 @@ export function isValidUrl(url: string): boolean {
       return false;
     }
 
-    // 포트 범위 검증
-    if (parsedUrl.port) {
-      const portNumber = parseInt(parsedUrl.port, 10);
-      if (isNaN(portNumber) || portNumber <= 0 || portNumber > 65535) {
-        return false;
-      }
+    // 포트 범위 검증 (헬퍼 함수 사용으로 로직 단순화)
+    if (parsedUrl.port && !isValidPort(parsedUrl.port)) {
+      return false;
     }
 
     return true;
@@ -105,8 +134,8 @@ export function extractDomain(url: string): string | null {
       return hostname;
     }
 
-    // IP 주소는 그대로 반환
-    if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+    // IP 주소는 그대로 반환 (헬퍼 함수 사용)
+    if (isIpAddress(hostname)) {
       return hostname;
     }
 
@@ -142,7 +171,7 @@ export function normalizeUrl(url: string): string {
     parsedUrl.hostname = parsedUrl.hostname.toLowerCase();
 
     // 기본 포트 제거
-    if (parsedUrl.port === DEFAULT_PORTS[parsedUrl.protocol as keyof typeof DEFAULT_PORTS]) {
+    if (parsedUrl.port === URL_CONSTANTS.DEFAULT_PORTS[parsedUrl.protocol as keyof typeof URL_CONSTANTS.DEFAULT_PORTS]) {
       parsedUrl.port = '';
     }
 
@@ -277,17 +306,17 @@ export function validateUrlFormat(url: string): boolean {
   }
 
   // 길이 제한 검사
-  if (url.length > MAX_URL_LENGTH) {
+  if (url.length > URL_CONSTANTS.MAX_LENGTH) {
     return false;
   }
 
-  // 이메일, 전화번호 등 특수 프로토콜 차단
-  if (/^(?:mailto|tel|sms):/i.test(url)) {
+  // 특수 프로토콜 차단 (상수 사용으로 유지보수성 향상)
+  if (URL_PATTERNS.specialProtocol.test(url)) {
     return false;
   }
 
-  // 상대 경로 차단
-  if (url.startsWith('/') || url.startsWith('../')) {
+  // 상대 경로 차단 (정규식 패턴 사용으로 정확성 향상)
+  if (URL_PATTERNS.relativePath.test(url)) {
     return false;
   }
 
@@ -299,12 +328,9 @@ export function validateUrlFormat(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
 
-    // 포트 범위 검증
-    if (parsedUrl.port) {
-      const portNumber = parseInt(parsedUrl.port, 10);
-      if (isNaN(portNumber) || portNumber <= 0 || portNumber > 65535) {
-        return false;
-      }
+    // 포트 범위 검증 (헬퍼 함수 사용으로 로직 단순화)
+    if (parsedUrl.port && !isValidPort(parsedUrl.port)) {
+      return false;
     }
 
     return true;
