@@ -69,10 +69,10 @@
 - Copilot 리뷰 피드백 반영 완료
 - 커밋: `chore: Vitest 및 React Testing Library 테스트 환경 설정`
 
-### 🎯 현재 진행 대상: Phase 1.2.2 (다음 진행)
+### ✅ Phase 1.2 완료: 기본 타입 정의 및 유틸리티 (TDD)
 **Phase 1.2: 기본 타입 정의 및 유틸리티 (TDD)**
-**상태**: 🟡 **진행 중** - Phase 1.2.1 완료, Phase 1.2.2 준비 중
-**다음 작업**: Phase 1.2.2 공통 유틸리티 함수 TDD 사이클
+**상태**: ✅ **완료** - Phase 1.2.1 완료, Phase 1.2.2 완료
+**다음 작업**: Phase 1.3 CSS 설정 및 테마 시스템 구축
 
 #### Phase 1.2.1 진행 상황 (데이터 모델 타입 정의) - ✅ **완료**
 1. ✅ **컬렉션 타입 TDD 사이클 완료**
@@ -94,26 +94,32 @@
 - **총 11개 TypeScript 파일 생성**
 - **완벽한 TDD 사이클 준수**: Red → Green → Refactor × 2회
 
-#### Phase 1.2.2 다음 진행 예정 (공통 유틸리티 함수)
-1. ⏳ **ID 생성 유틸리티 TDD 사이클**
-   - 🔴 Red: ID 생성 고유성, 형식 검증 테스트
-   - 🟢 Green: generateId 함수 개선 및 확장
-   - 🔵 Refactor: 성능 최적화 및 충돌 방지
+#### Phase 1.2.2 진행 완료 (공통 유틸리티 함수) - ✅ **완료**
+1. ✅ **ID 생성 유틸리티 TDD 사이클 완료**
+   - 🔴 Red: ID 생성 고유성, 형식 검증 테스트 작성
+   - 🟢 Green: generateId 함수 개선 및 확장 구현
+   - 🔵 Refactor: 성능 최적화 및 충돌 방지 완료
 
-2. ⏳ **날짜 포맷 유틸리티 TDD 사이클**
-   - 🔴 Red: 다양한 날짜 형식 변환 테스트
-   - 🟢 Green: formatDate, parseDate 함수 구현
-   - 🔵 Refactor: 국제화 및 타임존 처리
+2. ✅ **날짜 포맷 유틸리티 TDD 사이클 완료**
+   - 🔴 Red: 다양한 날짜 형식 변환 테스트 작성 (40개 테스트)
+   - 🟢 Green: formatDate, parseDate 등 모든 날짜 함수 구현
+   - 🔵 Refactor: UTC 기반 처리, 국제화 및 타임존 처리 완료
 
-3. ⏳ **URL 검증 유틸리티 확장 TDD 사이클**
-   - 🔴 Red: 고급 URL 검증 테스트 (도메인, 프로토콜)
-   - 🟢 Green: 확장된 URL 검증 및 정규화 함수
-   - 🔵 Refactor: 성능 최적화 및 보안 강화
+3. ✅ **URL 검증 유틸리티 TDD 사이클 완료**
+   - 🔴 Red: 고급 URL 검증 테스트 작성 (33개 테스트)
+   - 🟢 Green: URL 검증, 도메인 추출, 정규화 함수 구현
+   - 🔵 Refactor: 정규식 최적화 및 보안 강화 완료
 
-4. ⏳ **디바운스 유틸리티 TDD 사이클**
-   - 🔴 Red: 디바운스 타이밍, 취소 기능 테스트
-   - 🟢 Green: debounce, throttle 함수 구현
-   - 🔵 Refactor: 메모리 최적화 및 타입 안전성
+4. ✅ **디바운스 유틸리티 TDD 사이클 완료**
+   - 🔴 Red: 디바운스 타이밍, 취소 기능 테스트 작성 (22개 테스트)
+   - 🟢 Green: debounce, throttle, 고급 디바운스 함수 구현
+   - 🔵 Refactor: TypeScript 타입 안전성 강화 및 WeakMap 메모리 최적화 완료
+
+**Phase 1.2.2 완료 상태**:
+- **총 117개 테스트 모두 통과** ✅ (컬렉션/탭: 28개 + 날짜: 40개 + URL: 33개 + 디바운스: 22개)
+- **4개 유틸리티 모두 완전 구현**: ID, 날짜, URL, 디바운스
+- **완벽한 TDD 사이클 준수**: Red → Green → Refactor × 4회
+- **마지막 커밋**: `09701f8` - 디바운스 유틸리티 TypeScript 타입 안전성 강화
 
 ---
 
