@@ -1,5 +1,8 @@
 // Core Types for Tab Nexus Application
 
+// Theme Types
+export * from './theme';
+
 export interface Collection {
   id: string;
   title: string;
