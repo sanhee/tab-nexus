@@ -6,7 +6,7 @@ import type {
   ParsedCSS,
   ClassNameInput,
   Theme
-} from '@types/theme';
+} from '@/types/theme';
 
 /**
  * 테마 객체에서 CSS 변수 생성

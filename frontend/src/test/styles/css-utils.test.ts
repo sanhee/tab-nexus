@@ -11,7 +11,7 @@ import {
   createCSSRule,
   combineClassNames
 } from '@/utils/css';
-import type { Theme, CSSVariableMap, ResponsiveBreakpoints } from '@types/theme';
+import type { Theme, CSSVariableMap, ResponsiveBreakpoints } from '@/types/theme';
 
 describe('CSS 유틸리티', () => {
   let mockDocument: Document;

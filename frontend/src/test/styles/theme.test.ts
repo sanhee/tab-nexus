@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import type { Theme, ThemeColors, ThemeMode } from '@types/theme';
+import type { Theme, ThemeColors, ThemeMode } from '@/types/theme';
 import {
   createTheme,
   validateTheme,

@@ -1,5 +1,5 @@
-import type { Theme, ThemeMode, ThemeColors, ValidationResult } from '@types/theme';
-import { validate, required, oneOf } from './validation';
+import type { Theme, ThemeMode, ThemeColors } from '@/types/theme';
+import type { ValidationResult } from './validation';
 
 /**
  * 라이트 테마 색상 팔레트
