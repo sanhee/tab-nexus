@@ -45,8 +45,12 @@ This project follows **strict Test-Driven Development** with Red-Green-Refactor 
    - `git commit -m "feat: [feature] 기본 구현"`
 3. **🔵 Refactor**: Improve code quality while keeping tests green
    - `git commit -m "refactor: [feature] 최적화"`
+4. **📋 PR**: Create Pull Request for completed feature
+   - `git push -u origin feature/[name]`
+   - `gh pr create --title "[Phase X.Y]: [Feature Name] 완료 (TDD)" --body "..."`
 
 **Total planned commits: 315 across 105 TDD cycles over 10 phases**
+**NEVER FORGET: Always create PR after completing each phase/feature!**
 
 ### Front-End Code Organization
 ```
@@ -173,13 +177,32 @@ cd .. && git commit -m "refactor: your-feature 최적화"
 # 6. Update documentation
 # Edit docs/WORK_PROGRESS.md
 git add docs/ && git commit -m "docs: your-feature 완료 문서 업데이트"
+
+# 7. Create Pull Request
+git push -u origin feature/your-feature
+gh pr create --title "[Phase X.Y]: your-feature 완료 (TDD)" --body "..."
 ```
 
 ### Creating Pull Requests
+**CRITICAL**: NEVER forget to create PR after completing each phase/feature!
+
 - Use provided PR template in `.github/pull_request_template.md`
 - Target `develop` branch, not `main`
 - Fill out all checklist items
 - Include Korean summary and test results
+- **Always create PR immediately after completing feature implementation**
+
+#### Issue 연동 가이드
+**PR 생성 시 반드시 포함할 내용:**
+1. **완료되는 이슈**: `Closes #123` (PR 머지 시 이슈 자동 Close)
+2. **Phase 정보**: Phase X.Y 및 TDD 사이클 단계 명시
+3. **연관 이슈**: 참조만 하는 이슈는 `Related to #456`
+
+**자동화된 워크플로우:**
+- PR 머지 → 연관 이슈 자동 Close
+- 이슈에 완료 댓글 자동 추가
+- WORK_PROGRESS.md 자동 업데이트
+- 라벨 자동 동기화
 
 ## Technology Stack
 

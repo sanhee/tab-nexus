@@ -1,0 +1,215 @@
+# Tab Nexus GitHub Labels Configuration
+# Use: gh label sync --file .github/labels.yml
+
+# Phase Labels
+- name: "phase-1"
+  color: "0052cc"
+  description: "Phase 1: 프로젝트 설정 및 기본 구조"
+
+- name: "phase-2"
+  color: "0052cc"
+  description: "Phase 2: 상태 관리 및 데이터 레이어"
+
+- name: "phase-3"
+  color: "0052cc"
+  description: "Phase 3: 컬렉션 관리 기능"
+
+- name: "phase-4"
+  color: "0052cc"
+  description: "Phase 4: 탭 관리 기능"
+
+- name: "phase-5"
+  color: "0052cc"
+  description: "Phase 5: 뷰 모드 및 정렬 시스템"
+
+- name: "phase-6"
+  color: "0052cc"
+  description: "Phase 6: 태그 시스템"
+
+- name: "phase-7"
+  color: "0052cc"
+  description: "Phase 7: 검색 기능"
+
+- name: "phase-8"
+  color: "0052cc"
+  description: "Phase 8: 테마 시스템"
+
+- name: "phase-9"
+  color: "0052cc"
+  description: "Phase 9: E2E 테스트 및 통합"
+
+- name: "phase-10"
+  color: "0052cc"
+  description: "Phase 10: 최종 테스트 및 배포 준비"
+
+# TDD Cycle Labels
+- name: "tdd-red"
+  color: "d73a4a"
+  description: "🔴 Red Phase - 실패 테스트 작성"
+
+- name: "tdd-green"
+  color: "28a745"
+  description: "🟢 Green Phase - 테스트 통과 구현"
+
+- name: "tdd-refactor"
+  color: "0366d6"
+  description: "🔵 Refactor Phase - 코드 품질 개선"
+
+# Work Type Labels
+- name: "feat"
+  color: "a2eeef"
+  description: "새로운 기능 개발"
+
+- name: "fix"
+  color: "d73a4a"
+  description: "버그 수정"
+
+- name: "docs"
+  color: "0075ca"
+  description: "문서 작업"
+
+- name: "test"
+  color: "ffd33d"
+  description: "테스트 추가/수정"
+
+- name: "refactor"
+  color: "fbca04"
+  description: "리팩토링"
+
+- name: "perf"
+  color: "ff6347"
+  description: "성능 개선"
+
+- name: "style"
+  color: "f9d0c4"
+  description: "스타일링 작업"
+
+- name: "chore"
+  color: "fef2c0"
+  description: "기타 작업"
+
+# Priority Labels
+- name: "priority-high"
+  color: "d73a4a"
+  description: "🔴 높은 우선순위"
+
+- name: "priority-medium"
+  color: "fbca04"
+  description: "🟡 보통 우선순위"
+
+- name: "priority-low"
+  color: "28a745"
+  description: "🟢 낮은 우선순위"
+
+# Status Labels
+- name: "status-ready"
+  color: "0e8a16"
+  description: "작업 준비 완료"
+
+- name: "status-in-progress"
+  color: "fbca04"
+  description: "진행 중"
+
+- name: "status-blocked"
+  color: "d73a4a"
+  description: "블로킹됨"
+
+- name: "status-needs-review"
+  color: "0366d6"
+  description: "리뷰 필요"
+
+- name: "status-waiting"
+  color: "6f42c1"
+  description: "대기 중"
+
+# Component Labels
+- name: "component-collection"
+  color: "c5def5"
+  description: "컬렉션 관련"
+
+- name: "component-tab"
+  color: "c5def5"
+  description: "탭 관련"
+
+- name: "component-tag"
+  color: "c5def5"
+  description: "태그 관련"
+
+- name: "component-search"
+  color: "c5def5"
+  description: "검색 관련"
+
+- name: "component-theme"
+  color: "c5def5"
+  description: "테마 관련"
+
+- name: "component-ui"
+  color: "c5def5"
+  description: "UI 컴포넌트 관련"
+
+# Technical Labels
+- name: "typescript"
+  color: "3178c6"
+  description: "TypeScript 관련"
+
+- name: "react"
+  color: "61dafb"
+  description: "React 관련"
+
+- name: "testing"
+  color: "ffd33d"
+  description: "테스팅 관련"
+
+- name: "performance"
+  color: "ff6347"
+  description: "성능 관련"
+
+- name: "accessibility"
+  color: "7057ff"
+  description: "접근성 관련"
+
+- name: "mobile"
+  color: "ff69b4"
+  description: "모바일 관련"
+
+# Issue Type Labels
+- name: "bug"
+  color: "d73a4a"
+  description: "버그 신고"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "기능 개선 제안"
+
+- name: "question"
+  color: "d876e3"
+  description: "질문"
+
+- name: "discussion"
+  color: "d876e3"
+  description: "논의 필요"
+
+- name: "needs-triage"
+  color: "ffffff"
+  description: "트리아지 필요"
+
+- name: "good-first-issue"
+  color: "7057ff"
+  description: "첫 기여자에게 좋은 이슈"
+
+- name: "help-wanted"
+  color: "008672"
+  description: "도움 필요"
+
+# Resolution Labels
+- name: "wontfix"
+  color: "ffffff"
+  description: "수정하지 않음"
+
+- name: "duplicate"
+  color: "cfd3d7"
+  description: "중복 이슈"
+
+- name: "invalid"
+  color: "e4e669"
+  description: "유효하지 않음"
