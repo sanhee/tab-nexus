@@ -1,0 +1,302 @@
+name: Issue & PR Automation
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+  pull_request:
+    types: [opened, edited, closed, merged, synchronize]
+  push:
+    branches: [main, develop]
+
+jobs:
+  # Issue 생성/수정 시 라벨 자동 적용
+  auto-label-issue:
+    if: github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'edited')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-label Phase Issues
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = issue.body || '';
+
+            // Phase 라벨 자동 적용
+            const phaseLabels = [];
+            for (let i = 1; i <= 10; i++) {
+              if (title.includes(`phase ${i}`) || title.includes(`phase${i}`) || body.includes(`Phase ${i}`)) {
+                phaseLabels.push(`phase-${i}`);
+              }
+            }
+
+            // TDD 사이클 라벨 자동 적용
+            const tddLabels = [];
+            if (body.includes('Red Phase') || title.includes('실패 테스트')) {
+              tddLabels.push('tdd-red');
+            }
+            if (body.includes('Green Phase') || title.includes('기본 구현')) {
+              tddLabels.push('tdd-green');
+            }
+            if (body.includes('Refactor Phase') || title.includes('리팩토링')) {
+              tddLabels.push('tdd-refactor');
+            }
+
+            // 컴포넌트 라벨 자동 적용
+            const componentLabels = [];
+            const components = ['collection', 'tab', 'tag', 'search', 'theme', 'ui'];
+            components.forEach(comp => {
+              if (title.includes(comp) || body.includes(comp)) {
+                componentLabels.push(`component-${comp}`);
+              }
+            });
+
+            // 우선순위 라벨 (템플릿에서 체크된 경우)
+            const priorityLabels = [];
+            if (body.includes('[x] 🔴 높음')) {
+              priorityLabels.push('priority-high');
+            } else if (body.includes('[x] 🟡 보통')) {
+              priorityLabels.push('priority-medium');
+            } else if (body.includes('[x] 🟢 낮음')) {
+              priorityLabels.push('priority-low');
+            }
+
+            // 모든 라벨 적용
+            const allLabels = [...phaseLabels, ...tddLabels, ...componentLabels, ...priorityLabels];
+
+            if (allLabels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: allLabels
+              });
+            }
+
+  # PR 생성 시 연관 이슈 추출 및 라벨 동기화
+  link-pr-to-issue:
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract linked issues and sync labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const prBody = pr.body || '';
+            const prTitle = pr.title;
+
+            // 이슈 번호 추출 (Closes #123, Fixes #456, Related to #789 등)
+            const issueRegex = /#(\d+)/g;
+            const linkedIssues = [];
+            let match;
+
+            while ((match = issueRegex.exec(prBody)) !== null) {
+              linkedIssues.push(parseInt(match[1]));
+            }
+
+            // PR 제목에서도 이슈 번호 추출
+            while ((match = issueRegex.exec(prTitle)) !== null) {
+              linkedIssues.push(parseInt(match[1]));
+            }
+
+            console.log(`Found linked issues: ${linkedIssues}`);
+
+            // 연관된 이슈들의 라벨을 PR에도 적용
+            for (const issueNumber of [...new Set(linkedIssues)]) {
+              try {
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber
+                });
+
+                if (issue.data.labels.length > 0) {
+                  const issueLabels = issue.data.labels.map(label => label.name);
+
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    labels: issueLabels
+                  });
+
+                  console.log(`Added labels from issue #${issueNumber} to PR #${pr.number}`);
+                }
+              } catch (error) {
+                console.log(`Could not process issue #${issueNumber}: ${error.message}`);
+              }
+            }
+
+  # PR 머지 시 연관 이슈 자동 Close 및 상태 업데이트
+  close-linked-issues:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close linked issues and update status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const prBody = pr.body || '';
+            const prTitle = pr.title;
+
+            // 'Closes', 'Fixes', 'Resolves' 키워드로 연결된 이슈들 추출
+            const closeKeywords = ['closes', 'fixes', 'resolves', 'close', 'fix', 'resolve'];
+            const issuePatterns = closeKeywords.map(keyword =>
+              new RegExp(`${keyword}\\s+#(\\d+)`, 'gi')
+            );
+
+            const issuesToClose = [];
+
+            issuePatterns.forEach(pattern => {
+              let match;
+              while ((match = pattern.exec(prBody)) !== null) {
+                issuesToClose.push(parseInt(match[1]));
+              }
+
+              // PR 제목에서도 확인
+              pattern.lastIndex = 0; // 정규식 리셋
+              while ((match = pattern.exec(prTitle)) !== null) {
+                issuesToClose.push(parseInt(match[1]));
+              }
+            });
+
+            console.log(`Issues to close: ${issuesToClose}`);
+
+            // 중복 제거 후 이슈들을 닫기
+            for (const issueNumber of [...new Set(issuesToClose)]) {
+              try {
+                // 이슈 닫기
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  state: 'closed'
+                });
+
+                // 완료 댓글 추가
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: `✅ **작업 완료**
+
+이 이슈는 PR #${pr.number} 머지를 통해 완료되었습니다.
+
+**완료된 작업:**
+- ${prTitle}
+
+**머지 정보:**
+- 머지 시간: ${new Date().toISOString()}
+- 머지자: @${pr.merged_by?.login || 'unknown'}
+- 머지 커밋: ${pr.merge_commit_sha}
+
+🎉 수고하셨습니다!`
+                });
+
+                console.log(`Closed issue #${issueNumber} and added completion comment`);
+
+              } catch (error) {
+                console.log(`Failed to close issue #${issueNumber}: ${error.message}`);
+              }
+            }
+
+  # 이슈 상태 변경 시 프로젝트 보드 업데이트
+  update-project-board:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update project board status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+
+            // 이슈 상태에 따른 라벨 자동 적용
+            if (github.event.action === 'opened') {
+              // 새 이슈는 'status-ready' 라벨 추가
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['status-ready']
+              });
+            } else if (github.event.action === 'closed') {
+              // 닫힌 이슈는 진행 상태 라벨 제거
+              const statusLabels = ['status-ready', 'status-in-progress', 'status-blocked', 'status-needs-review'];
+
+              for (const label of statusLabels) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    name: label
+                  });
+                } catch (error) {
+                  // 라벨이 없는 경우 무시
+                }
+              }
+            }
+
+  # Phase 완료 시 WORK_PROGRESS.md 자동 업데이트
+  update-progress-docs:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update WORK_PROGRESS.md
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const prTitle = pr.title;
+            const prBody = pr.body || '';
+
+            // Phase 완료 여부 확인
+            if (prTitle.toLowerCase().includes('phase') && prTitle.toLowerCase().includes('완료')) {
+              const fs = require('fs');
+              const path = 'docs/WORK_PROGRESS.md';
+
+              try {
+                let content = fs.readFileSync(path, 'utf8');
+
+                // 현재 날짜로 작업 로그 추가
+                const today = new Date().toISOString().split('T')[0];
+                const logEntry = `
+### ${today} - PR #${pr.number} 머지
+- ✅ ${prTitle}
+- 머지자: @${pr.merged_by?.login || 'unknown'}
+- 커밋: ${pr.merge_commit_sha?.substring(0, 7)}
+`;
+
+                // "작업 로그" 섹션에 추가
+                if (content.includes('## 📝 작업 로그')) {
+                  content = content.replace(
+                    '## 📝 작업 로그',
+                    `## 📝 작업 로그${logEntry}`
+                  );
+                } else {
+                  content += `\n## 📝 작업 로그${logEntry}`;
+                }
+
+                fs.writeFileSync(path, content);
+
+                // 변경사항 커밋
+                const { execSync } = require('child_process');
+                execSync('git config user.name "github-actions[bot]"');
+                execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
+                execSync(`git add ${path}`);
+                execSync(`git commit -m "docs: Phase 완료 자동 업데이트 - ${prTitle}"`);
+                execSync('git push');
+
+                console.log('WORK_PROGRESS.md updated successfully');
+              } catch (error) {
+                console.log(`Failed to update WORK_PROGRESS.md: ${error.message}`);
+              }
+            }
