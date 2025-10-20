@@ -34,7 +34,7 @@ git commit -m "feat: your changes"
 ### Project Structure
 - **Repository root**: Git operations, documentation (`docs/`), templates (`.github/`)
 - **`/frontend`**: React application with strict TypeScript and TDD methodology
-- **`/docs`**: Critical documentation - always check `WORK_PROGRESS.md` first for current status and `WBS.md`, `PROJECT_SPECIFICATION.md`, `DEVELOPMENT_MISTAKE.md`
+- **`/docs`**: Critical documentation - always check git log and `WORK_PROGRESS.md` first for current status and `WBS.md`, `PROJECT_SPECIFICATION.md`, `DEVELOPMENT_MISTAKE.md`
 
 ### TDD Development Cycle
 This project follows **strict Test-Driven Development** with Red-Green-Refactor cycles:
