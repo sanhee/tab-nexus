@@ -321,4 +321,181 @@ describe('탭 스토어', () => {
       expect(savedTab!.url).toBe('http://example.com')
     })
   })
+
+  describe('탭 수정 기능', () => {
+    test('탭 제목을 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '원래 제목',
+        url: 'https://example.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      updateTab(newTab.id, { title: '수정된 제목' })
+
+      const updatedTab = getTabById(newTab.id)
+      expect(updatedTab!.title).toBe('수정된 제목')
+      expect(updatedTab!.updatedAt).not.toEqual(newTab.createdAt)
+    })
+
+    test('탭 URL을 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '테스트 탭',
+        url: 'https://original.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      updateTab(newTab.id, { url: 'https://updated.com' })
+
+      const updatedTab = getTabById(newTab.id)
+      expect(updatedTab!.url).toBe('https://updated.com')
+    })
+
+    test('잘못된 URL로 수정할 수 없다', () => {
+      const { addTab, updateTab } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '테스트 탭',
+        url: 'https://original.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+
+      expect(() => {
+        updateTab(newTab.id, { url: 'invalid-url' })
+      }).toThrow('올바른 URL 형식이 아닙니다')
+    })
+
+    test('중복된 URL로 수정할 수 없다', () => {
+      const { addTab, updateTab } = useTabStore.getState()
+      const collectionId = 'test-collection'
+
+      const tab1Input: TabInput = {
+        title: '첫 번째 탭',
+        url: 'https://first.com',
+        collectionId
+      }
+
+      const tab2Input: TabInput = {
+        title: '두 번째 탭',
+        url: 'https://second.com',
+        collectionId
+      }
+
+      addTab(tab1Input)
+      const tab2 = addTab(tab2Input)
+
+      expect(() => {
+        updateTab(tab2.id, { url: 'https://first.com' })
+      }).toThrow('같은 컬렉션에 동일한 URL이 이미 존재합니다')
+    })
+
+    test('노트 타입 탭은 빈 URL로 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const noteTabInput: TabInput = {
+        title: '노트 탭',
+        url: 'https://example.com',
+        collectionId: 'test-collection',
+        type: 'note'
+      }
+
+      const noteTab = addTab(noteTabInput)
+      updateTab(noteTab.id, { url: '' })
+
+      const updatedTab = getTabById(noteTab.id)
+      expect(updatedTab!.url).toBe('')
+    })
+
+    test('탭 설명을 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '테스트 탭',
+        url: 'https://example.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      updateTab(newTab.id, { description: '새로운 설명' })
+
+      const updatedTab = getTabById(newTab.id)
+      expect(updatedTab!.description).toBe('새로운 설명')
+    })
+
+    test('노트 내용을 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const noteTabInput: TabInput = {
+        title: '노트 탭',
+        url: '',
+        collectionId: 'test-collection',
+        type: 'note',
+        noteContent: '# 원래 내용'
+      }
+
+      const noteTab = addTab(noteTabInput)
+      updateTab(noteTab.id, { noteContent: '# 수정된 내용\n\n새로운 섹션' })
+
+      const updatedTab = getTabById(noteTab.id)
+      expect(updatedTab!.noteContent).toBe('# 수정된 내용\n\n새로운 섹션')
+    })
+
+    test('탭 태그를 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '태그 탭',
+        url: 'https://example.com',
+        collectionId: 'test-collection',
+        tags: ['원래', '태그']
+      }
+
+      const newTab = addTab(tabInput)
+      updateTab(newTab.id, { tags: ['수정된', '태그', '목록'] })
+
+      const updatedTab = getTabById(newTab.id)
+      expect(updatedTab!.tags).toEqual(['수정된', '태그', '목록'])
+    })
+
+    test('존재하지 않는 탭을 수정하려 하면 오류가 발생한다', () => {
+      const { updateTab } = useTabStore.getState()
+
+      expect(() => {
+        updateTab('non-existent-id', { title: '수정된 제목' })
+      }).toThrow('탭을 찾을 수 없습니다')
+    })
+
+    test('여러 필드를 동시에 수정할 수 있다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '원래 제목',
+        url: 'https://original.com',
+        collectionId: 'test-collection',
+        description: '원래 설명',
+        tags: ['원래']
+      }
+
+      const newTab = addTab(tabInput)
+      updateTab(newTab.id, {
+        title: '수정된 제목',
+        url: 'https://updated.com',
+        description: '수정된 설명',
+        tags: ['수정된', '태그']
+      })
+
+      const updatedTab = getTabById(newTab.id)
+      expect(updatedTab!.title).toBe('수정된 제목')
+      expect(updatedTab!.url).toBe('https://updated.com')
+      expect(updatedTab!.description).toBe('수정된 설명')
+      expect(updatedTab!.tags).toEqual(['수정된', '태그'])
+    })
+  })
 })
