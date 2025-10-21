@@ -28,6 +28,16 @@ export interface Tab {
   lastVisited?: Date;
 }
 
+export interface TabInput {
+  title: string;
+  url: string;
+  collectionId: string;
+  description?: string;
+  type?: 'link' | 'note';
+  noteContent?: string;
+  tags?: string[];
+}
+
 export interface Tag {
   id: string;
   name: string;
