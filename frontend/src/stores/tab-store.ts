@@ -148,24 +148,39 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     }
 
     const removedTab = tabs[tabIndex]
-    const newTabs = tabs.filter(tab => tab.id !== id)
 
-    // 같은 컬렉션의 탭들의 sortOrder 재정렬
-    const reorderedTabs = newTabs.map(tab => {
+    // 성능 최적화: 삭제할 탭보다 높은 sortOrder를 가진 같은 컬렉션 탭들만 처리
+    const updatedTabs: Tab[] = []
+    const now = new Date()
+    let reorderNeeded = false
+
+    for (const tab of tabs) {
+      if (tab.id === id) {
+        continue // 삭제할 탭은 제외
+      }
+
       if (tab.collectionId === removedTab.collectionId && tab.sortOrder > removedTab.sortOrder) {
-        return {
+        // 재정렬이 필요한 탭
+        updatedTabs.push({
           ...tab,
           sortOrder: tab.sortOrder - 1,
-          updatedAt: new Date()
-        }
+          updatedAt: now
+        })
+        reorderNeeded = true
+      } else {
+        // 변경 불필요한 탭
+        updatedTabs.push(tab)
       }
-      return tab
-    })
+    }
 
-    set({ tabs: reorderedTabs })
+    set({ tabs: updatedTabs })
 
-    // 캐시 무효화
-    cacheManager.clearAll()
+    // 캐시 무효화 (재정렬이 있었던 경우에만 전체 무효화)
+    if (reorderNeeded) {
+      cacheManager.clearAll()
+    } else {
+      cacheManager.clearTab(id)
+    }
   },
 
   /**
@@ -239,21 +254,38 @@ export const useTabStore = create<TabStore>()((set, get) => ({
    * 탭 이동 (드래그앤드롭)
    */
   moveTab: (tabId: string, fromIndex: number, toIndex: number): void => {
-    const { tabs } = get()
-
     if (fromIndex === toIndex) return
 
+    const { tabs } = get()
+
+    // 전체 배열에서 직접 이동 (기존 테스트 호환성 유지)
     const newTabs = [...tabs]
     const [movedTab] = newTabs.splice(fromIndex, 1)
     newTabs.splice(toIndex, 0, movedTab)
 
-    // sortOrder 업데이트
+    // 성능 최적화: sortOrder 업데이트 (변경된 탭들만)
     const now = new Date()
-    const updatedTabs = newTabs.map((tab, index) => ({
-      ...tab,
-      sortOrder: index,
-      updatedAt: now,
-    }))
+    const minIndex = Math.min(fromIndex, toIndex)
+    const maxIndex = Math.max(fromIndex, toIndex)
+
+    const updatedTabs = newTabs.map((tab, index) => {
+      // 영향받은 범위의 탭들만 업데이트
+      if (index >= minIndex && index <= maxIndex) {
+        return {
+          ...tab,
+          sortOrder: index,
+          updatedAt: now
+        }
+      }
+      // 범위 밖 탭들은 sortOrder만 업데이트 (updatedAt은 변경하지 않음)
+      else if (tab.sortOrder !== index) {
+        return {
+          ...tab,
+          sortOrder: index
+        }
+      }
+      return tab
+    })
 
     set({ tabs: updatedTabs })
 
