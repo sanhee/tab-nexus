@@ -300,20 +300,32 @@ npm run lint
 ### ⚡ **실시간 검증 명령어**
 
 ```bash
-# PR 템플릿 확인
-cat .github/pull_request_template.md
+# 매 커밋 전 필수 명령어
+cd /Users/al03176821/sideproject/tab-nexus/frontend
+npm run build                 # TypeScript 컴파일 확인
+npm test                      # 모든 테스트 통과 확인
+cd .. && git status          # 변경사항 확인
 
-# 하드코딩 경로 검사
-grep -r "/Users/" . --exclude-dir=node_modules
+# 작업 시작 전 필수 명령어
+git fetch origin             # 원격 최신 정보 가져오기
+git status                   # 현재 브랜치 상태 확인
+git log --oneline -5         # 최근 커밋 이력 확인
 
-# Non-null assertion 검사
-grep -r "\!" src/ --include="*.ts" --include="*.tsx"
+# PR 관련 검증
+cat .github/pull_request_template.md  # PR 템플릿 확인
 
-# Copilot 리뷰 상세 확인
-gh api repos/owner/repo/pulls/PR_NUM/comments
+# 코드 품질 검사
+grep -r "/Users/" . --exclude-dir=node_modules  # 하드코딩 경로 검사
+grep -r "\!" src/ --include="*.ts" --include="*.tsx"  # Non-null assertion 검사
 
-# 스크립트 이식성 테스트 (임시 디렉토리에서)
-cd /tmp && /path/to/script
+# GitHub 관련
+gh api repos/owner/repo/pulls/PR_NUM/comments  # Copilot 리뷰 상세 확인
+
+# 스크립트 이식성 테스트
+cd /tmp && /path/to/script    # 임시 디렉토리에서 스크립트 테스트
+
+# 브랜치 충돌 예방
+git diff origin/develop...HEAD  # develop과의 차이점 확인
 ```
 
 ### 📈 **지속적 개선 원칙**
@@ -324,11 +336,58 @@ cd /tmp && /path/to/script
 4. **이식성 고려**: 개발자 환경 의존성 최소화
 5. **안전성 우선**: 편의성보다 타입 안전성 우선
 
+### 📋 **Phase 2.1.2 추가 실수 분석**
+
+**6. TypeScript 컴파일 에러 누적 (중대한 실수)**
+- ❌ 실수: 20+ TypeScript 에러를 사전에 발견하지 못함
+- 🔍 원인: 각 단계에서 `npm run build` 검증 누락
+- 📝 사용자 피드백: "이런에러들을 제발 하나도 남기지 말고 무결점으로 유지하고 PR을 올려"
+- ✅ 개선: **매 커밋마다** `npm run build` 필수 실행
+
+**7. 브랜치 충돌 대응 미흡**
+- ❌ 실수: develop 브랜치 변경사항을 사전에 확인하지 않음
+- 🔍 원인: `git fetch origin` 및 충돌 예상 작업 부족
+- ✅ 개선: 작업 시작 전 항상 `git fetch origin && git status` 확인
+
+**8. 테스트 타이밍 이슈 (비결정적 테스트)**
+- ❌ 실수: 시간 기반 테스트에서 불안정한 결과 발생
+- 🔍 원인: `createdAt`과 `updatedAt` 비교 로직 오류
+- ✅ 개선: 시간 비교 시 원본 값 저장 후 비교, 충분한 지연 시간(2ms+) 보장
+
+**9. 커밋되지 않은 변경사항 놓침**
+- ❌ 실수: 테스트 수정 후 `git status` 확인 누락
+- 🔍 원인: 작업 완료 후 최종 상태 검증 부족
+- 📝 사용자 발견: "지금 깃에 변경사항 하나 남아있는거 같은데"
+- ✅ 개선: 모든 작업 완료 후 `git status` 필수 확인
+
+### 🔒 **Phase 2.1.2 추가 체크리스트**
+
+#### **매 커밋 전 필수 검증**
+- [ ] `npm run build` 실행하여 TypeScript 컴파일 성공 확인
+- [ ] `npm test` 실행하여 모든 테스트 통과 확인
+- [ ] `git status`로 모든 변경사항이 staging되었는지 확인
+
+#### **작업 시작 전 필수 확인**
+- [ ] `git fetch origin` 실행
+- [ ] `git status` 및 `git log --oneline -5`로 최신 상태 확인
+- [ ] 충돌 가능성이 있는 develop 브랜치 변경사항 확인
+
+#### **시간 기반 테스트 작성 시**
+- [ ] 원본 시간값을 별도 변수에 저장
+- [ ] 비교 전 충분한 지연 시간(2ms+) 보장
+- [ ] `await new Promise(resolve => setTimeout(resolve, 2))` 패턴 사용
+
+#### **작업 완료 후 최종 검증**
+- [ ] `git status`로 working tree가 clean인지 확인
+- [ ] 모든 변경사항이 커밋되었는지 확인
+- [ ] `git log --oneline -3`으로 커밋 이력 검토
+
 ### 🎯 **다음 Phase 적용사항**
 
 - Phase 2.2부터 위 체크리스트 **강제 적용**
 - 실수 발생 시 문서에 **즉시 추가**
 - 자동화 스크립트에 검증 로직 **필수 포함**
+- **"사용자가 발견하기 전에 Claude가 먼저 알아야 한다"** 원칙 철저히 준수
 
 ## Validation Pattern
 
