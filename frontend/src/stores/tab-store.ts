@@ -5,6 +5,7 @@ import {
   validateTabTitle,
   validateUrl,
   validateDuplicateUrl,
+  validateByTabType,
   TabValidationError,
   TAB_ERROR_CODES
 } from '@/utils/tab-validation'
@@ -93,24 +94,30 @@ export const useTabStore = create<TabStore>()((set, get) => ({
    * 새 탭 추가
    */
   addTab: (input: TabInput): Tab => {
-    validateTabInput(input)
-
     const { tabs } = get()
 
-    // 중복 URL 검증 (링크 타입만)
-    validateDuplicateUrl(input.url, input.collectionId, tabs)
+    // 기본 검증 (제목, 컬렉션ID)
+    validateTabInput(input)
+
+    // 탭 타입별 고급 검증 (URL, 중복)
+    validateByTabType(input, input.collectionId, tabs)
 
     const now = new Date()
 
-    // 해당 컬렉션의 탭 개수로 sortOrder 결정
-    const collectionTabs = tabs.filter(tab => tab.collectionId === input.collectionId)
+    // 해당 컬렉션의 탭 개수로 sortOrder 결정 (성능 최적화)
+    let sortOrder = 0
+    for (const tab of tabs) {
+      if (tab.collectionId === input.collectionId) {
+        sortOrder++
+      }
+    }
 
     const newTab: Tab = {
       id: generateId(),
       title: input.title.trim(),
       url: input.url,
       collectionId: input.collectionId,
-      sortOrder: collectionTabs.length,
+      sortOrder,
       type: input.type || 'link',
       tags: input.tags || [],
       createdAt: now,
@@ -179,15 +186,12 @@ export const useTabStore = create<TabStore>()((set, get) => ({
       validateTabTitle(updates.title)
     }
 
-    // URL 검증 (탭 타입 고려)
-    if (updates.url !== undefined) {
-      validateUrl(updates.url, existingTab.type)
+    // URL 검증 및 중복 검사
+    if (updates.url !== undefined && updates.url !== existingTab.url) {
+      const otherTabs = tabs.filter(tab => tab.id !== id)
+      const updateInput = { url: updates.url, type: existingTab.type }
 
-      // URL이 변경되는 경우 중복 검사
-      if (updates.url !== existingTab.url) {
-        const otherTabs = tabs.filter(tab => tab.id !== id)
-        validateDuplicateUrl(updates.url, existingTab.collectionId, otherTabs)
-      }
+      validateByTabType(updateInput, existingTab.collectionId, otherTabs)
     }
 
     const updatedTabs = tabs.map(tab =>

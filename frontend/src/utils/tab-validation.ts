@@ -97,23 +97,82 @@ export function validateTabInput(input: {
 }
 
 /**
+ * 중복 URL 검증 옵션
+ */
+interface DuplicateUrlOptions {
+  skipNoteType?: boolean
+  skipEmptyUrl?: boolean
+}
+
+/**
  * 중복 URL 검증
  */
 export function validateDuplicateUrl(
   url: string,
   collectionId: string,
-  existingTabs: Array<{ url: string; collectionId: string; type: 'link' | 'note' }>
+  existingTabs: Array<{ url: string; collectionId: string; type: 'link' | 'note' }>,
+  options: DuplicateUrlOptions = { skipNoteType: true, skipEmptyUrl: true }
 ): void {
-  // 노트 타입이거나 빈 URL은 중복 검사하지 않음
-  if (!url.trim()) {
+  // 빈 URL은 중복 검사하지 않음
+  if (options.skipEmptyUrl && !url.trim()) {
     return
   }
 
-  const duplicateTab = existingTabs.find(
-    tab => tab.url === url && tab.collectionId === collectionId && tab.type === 'link'
-  )
+  // 성능 최적화: Set을 사용하여 O(1) 조회
+  const urlSet = new Set<string>()
 
-  if (duplicateTab) {
-    throw new TabValidationError('같은 컬렉션에 동일한 URL이 이미 존재합니다', TAB_ERROR_CODES.DUPLICATE_URL)
+  for (const tab of existingTabs) {
+    if (tab.collectionId === collectionId) {
+      // 노트 타입 건너뛰기 옵션
+      if (options.skipNoteType && tab.type === 'note') {
+        continue
+      }
+
+      if (tab.url === url) {
+        throw new TabValidationError(
+          '같은 컬렉션에 동일한 URL이 이미 존재합니다',
+          TAB_ERROR_CODES.DUPLICATE_URL
+        )
+      }
+    }
+  }
+}
+
+/**
+ * 탭 타입별 검증 규칙
+ */
+const TAB_TYPE_RULES = {
+  link: {
+    urlRequired: true,
+    allowEmptyUrl: false,
+    checkDuplicate: true
+  },
+  note: {
+    urlRequired: false,
+    allowEmptyUrl: true,
+    checkDuplicate: false
+  }
+} as const
+
+/**
+ * 탭 타입별 검증
+ */
+export function validateByTabType(
+  input: { url: string; type?: 'link' | 'note' },
+  collectionId: string,
+  existingTabs: Array<{ url: string; collectionId: string; type: 'link' | 'note' }> = []
+): void {
+  const tabType = input.type || 'link'
+  const rules = TAB_TYPE_RULES[tabType]
+
+  // URL 검증
+  validateUrl(input.url, tabType)
+
+  // 중복 검사 (타입별 규칙 적용)
+  if (rules.checkDuplicate) {
+    validateDuplicateUrl(input.url, collectionId, existingTabs, {
+      skipNoteType: true,
+      skipEmptyUrl: !rules.urlRequired
+    })
   }
 }
