@@ -333,15 +333,16 @@ describe('탭 스토어', () => {
       }
 
       const newTab = addTab(tabInput)
+      const originalUpdatedAt = newTab.updatedAt
 
       // 시간 차이를 보장하기 위해 잠시 대기
-      await new Promise(resolve => setTimeout(resolve, 1))
+      await new Promise(resolve => setTimeout(resolve, 2))
 
       updateTab(newTab.id, { title: '수정된 제목' })
 
       const updatedTab = getTabById(newTab.id)
       expect(updatedTab!.title).toBe('수정된 제목')
-      expect(updatedTab!.updatedAt).not.toEqual(newTab.createdAt)
+      expect(updatedTab!.updatedAt).not.toEqual(originalUpdatedAt)
     })
 
     test('탭 URL을 수정할 수 있다', () => {
