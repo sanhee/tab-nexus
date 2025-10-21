@@ -330,7 +330,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
   },
 
   /**
-   * 탭 검색 (제목, URL, 설명에서 검색)
+   * 탭 검색 (제목, URL, 설명, 노트내용, 태그에서 검색)
    */
   searchTabs: (query: string): Tab[] => {
     if (typeof query !== 'string' || !query.trim()) return []
@@ -344,11 +344,60 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     }
 
     const { tabs } = get()
-    const results = tabs.filter(tab =>
-      tab.title.toLowerCase().includes(trimmedQuery) ||
-      tab.url.toLowerCase().includes(trimmedQuery) ||
-      (tab.description && tab.description.toLowerCase().includes(trimmedQuery))
-    )
+
+    // 검색 대상 필드와 가중치 설정 (관련성 기반 정렬용)
+    const searchableFields = [
+      { field: 'title', weight: 3 },          // 제목에서 매칭 시 높은 가중치
+      { field: 'description', weight: 2 },    // 설명에서 매칭 시 중간 가중치
+      { field: 'url', weight: 1 },            // URL에서 매칭 시 낮은 가중치
+      { field: 'noteContent', weight: 2 },    // 노트 내용 중간 가중치
+      { field: 'tags', weight: 3 }            // 태그 높은 가중치
+    ]
+
+    const resultsWithScore: Array<{ tab: Tab; score: number }> = []
+
+    for (const tab of tabs) {
+      let totalScore = 0
+
+      for (const { field, weight } of searchableFields) {
+        const fieldValue = tab[field as keyof Tab]
+
+        if (field === 'tags' && Array.isArray(fieldValue)) {
+          // 태그 배열 검색
+          const matchingTags = fieldValue.filter(tag =>
+            tag.toLowerCase().includes(trimmedQuery)
+          )
+          if (matchingTags.length > 0) {
+            totalScore += weight * matchingTags.length // 매칭된 태그 수만큼 가중치 증가
+          }
+        } else if (fieldValue && typeof fieldValue === 'string') {
+          // 문자열 필드 검색
+          const lowerFieldValue = fieldValue.toLowerCase()
+          if (lowerFieldValue.includes(trimmedQuery)) {
+            // 정확히 일치하는 경우 더 높은 점수
+            if (lowerFieldValue === trimmedQuery) {
+              totalScore += weight * 2
+            } else {
+              totalScore += weight
+            }
+          }
+        }
+      }
+
+      if (totalScore > 0) {
+        resultsWithScore.push({ tab, score: totalScore })
+      }
+    }
+
+    // 점수 기반 정렬 (높은 점수 먼저, 같은 점수면 제목 알파벳 순)
+    const results = resultsWithScore
+      .sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score
+        }
+        return a.tab.title.localeCompare(b.tab.title)
+      })
+      .map(item => item.tab)
 
     cacheManager.setSearchResults(cacheKey, results)
     return results

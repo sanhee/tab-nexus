@@ -1017,5 +1017,94 @@ describe('탭 스토어', () => {
       expect(mixedResults).toHaveLength(1)
       expect(mixedResults[0].title).toContain('구글')
     })
+
+    test('태그로 탭을 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '개발 블로그',
+        url: 'https://blog.example.com',
+        collectionId: 'tag-search-test',
+        tags: ['개발', '프로그래밍', 'JavaScript']
+      })
+
+      addTab({
+        title: '디자인 리소스',
+        url: 'https://design.example.com',
+        collectionId: 'tag-search-test',
+        tags: ['디자인', 'UI/UX', '리소스']
+      })
+
+      const devResults = searchTabs('개발')
+      expect(devResults).toHaveLength(1)
+      expect(devResults[0].tags).toContain('개발')
+
+      const jsResults = searchTabs('JavaScript')
+      expect(jsResults).toHaveLength(1)
+      expect(jsResults[0].tags).toContain('JavaScript')
+    })
+
+    test('노트 내용으로 탭을 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '학습 노트',
+        url: '',
+        collectionId: 'note-content-test',
+        type: 'note',
+        noteContent: '# TypeScript 학습\n\n타입 시스템에 대해 배우고 있다.'
+      })
+
+      addTab({
+        title: '일반 탭',
+        url: 'https://typescript.org',
+        collectionId: 'note-content-test'
+      })
+
+      const typeResults = searchTabs('TypeScript')
+      expect(typeResults).toHaveLength(2) // 노트 내용과 URL 모두에서 매칭
+
+      const systemResults = searchTabs('타입 시스템')
+      expect(systemResults).toHaveLength(1)
+      expect(systemResults[0].type).toBe('note')
+    })
+
+    test('검색 결과가 관련성 순으로 정렬된다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      // 제목에 정확히 일치하는 탭 (높은 점수)
+      addTab({
+        title: 'React',
+        url: 'https://example1.com',
+        collectionId: 'relevance-test'
+      })
+
+      // 태그에 매칭되는 탭 (높은 점수)
+      addTab({
+        title: '프론트엔드 개발',
+        url: 'https://example2.com',
+        collectionId: 'relevance-test',
+        tags: ['React', 'JavaScript']
+      })
+
+      // URL에만 매칭되는 탭 (낮은 점수)
+      addTab({
+        title: '개발 도구',
+        url: 'https://react.dev',
+        collectionId: 'relevance-test'
+      })
+
+      const results = searchTabs('React')
+      expect(results).toHaveLength(3)
+
+      // 첫 번째 결과는 제목에 정확히 일치하는 탭이어야 함
+      expect(results[0].title).toBe('React')
+
+      // 두 번째는 태그에 매칭되는 탭
+      expect(results[1].tags).toContain('React')
+
+      // 세 번째는 URL에만 매칭되는 탭
+      expect(results[2].url).toContain('react.dev')
+    })
   })
 })
