@@ -26,20 +26,20 @@ interface CollectionStore {
   collections: Collection[]
 
   // 컬렉션 관리 액션
-  addCollection: (title: string) => Collection
-  removeCollection: (id: string) => void
-  updateCollection: (id: string, updates: CollectionUpdates) => void
-  reorderCollections: (fromIndex: number, toIndex: number) => void
+  addCollection: (_title: string) => Collection
+  removeCollection: (_id: string) => void
+  updateCollection: (_id: string, _updates: CollectionUpdates) => void
+  reorderCollections: (_fromIndex: number, _toIndex: number) => void
 
   // 컬렉션 조회 (메모이제이션 적용)
-  getCollectionById: (id: string) => Collection | undefined
-  searchCollections: (query: string) => Collection[]
-  getCollectionsByIds: (ids: string[]) => Collection[]
+  getCollectionById: (_id: string) => Collection | undefined
+  searchCollections: (_query: string) => Collection[]
+  getCollectionsByIds: (_ids: string[]) => Collection[]
 
   // 통계 및 유틸리티
   getCollectionCount: () => number
   isEmpty: () => boolean
-  hasCollection: (id: string) => boolean
+  hasCollection: (_id: string) => boolean
 
   // 스토어 관리
   reset: () => void

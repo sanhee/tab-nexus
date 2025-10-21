@@ -115,7 +115,7 @@ export function validateTheme(theme: unknown): ValidationResult {
     };
   }
 
-  const t = theme as any;
+  const t = theme as Partial<Theme>;
   const errors: string[] = [];
 
   // 필수 필드 검증
