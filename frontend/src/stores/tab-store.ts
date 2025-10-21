@@ -181,9 +181,14 @@ export const useTabStore = create<TabStore>()((set, get) => ({
 
     const existingTab = tabs[tabIndex]
 
-    // 제목 검증
+    // 업데이트할 필드들을 전처리하고 검증
+    const processedUpdates: Partial<Tab> = {}
+
+    // 제목 검증 및 트림 처리
     if (updates.title !== undefined) {
-      validateTabTitle(updates.title)
+      const trimmedTitle = updates.title.trim()
+      validateTabTitle(trimmedTitle)
+      processedUpdates.title = trimmedTitle
     }
 
     // URL 검증 및 중복 검사
@@ -192,13 +197,36 @@ export const useTabStore = create<TabStore>()((set, get) => ({
       const updateInput = { url: updates.url, type: existingTab.type }
 
       validateByTabType(updateInput, existingTab.collectionId, otherTabs)
+      processedUpdates.url = updates.url
     }
 
-    const updatedTabs = tabs.map(tab =>
-      tab.id === id
-        ? { ...tab, ...updates, updatedAt: new Date() }
-        : tab
-    )
+    // 기타 필드들 처리
+    if (updates.description !== undefined) {
+      processedUpdates.description = updates.description
+    }
+
+    if (updates.noteContent !== undefined) {
+      processedUpdates.noteContent = updates.noteContent
+    }
+
+    if (updates.tags !== undefined) {
+      processedUpdates.tags = updates.tags
+    }
+
+    // 실제 변경사항이 있는지 확인 (성능 최적화)
+    const hasChanges = Object.keys(processedUpdates).length > 0
+
+    if (!hasChanges) {
+      return // 변경사항이 없으면 조기 반환
+    }
+
+    // 성능 최적화: 배열 복사 후 직접 수정 (map 대신)
+    const updatedTabs = [...tabs]
+    updatedTabs[tabIndex] = {
+      ...existingTab,
+      ...processedUpdates,
+      updatedAt: new Date()
+    }
 
     set({ tabs: updatedTabs })
 

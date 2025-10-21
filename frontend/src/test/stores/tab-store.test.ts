@@ -501,5 +501,21 @@ describe('탭 스토어', () => {
       expect(updatedTab!.description).toBe('수정된 설명')
       expect(updatedTab!.tags).toEqual(['수정된', '태그'])
     })
+
+    test('탭 수정 시 제목이 트림된다', () => {
+      const { addTab, updateTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '원래 제목',
+        url: 'https://example.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      updateTab(newTab.id, { title: '  공백이 있는 제목  ' })
+
+      const updatedTab = getTabById(newTab.id)
+      expect(updatedTab!.title).toBe('공백이 있는 제목')
+    })
   })
 })
