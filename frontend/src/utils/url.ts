@@ -26,7 +26,6 @@ const URL_PATTERNS = {
   relativePath: /^\.{0,2}\//
 } as const;
 
-
 // URL 관련 상수들 (성능 및 유지보수성 향상)
 const URL_CONSTANTS = {
   // RFC 3986 권장 최대 길이

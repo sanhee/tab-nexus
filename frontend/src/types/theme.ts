@@ -10,6 +10,7 @@ export type ThemeMode = 'light' | 'dark';
 export interface ThemeColors {
   primary: string;
   secondary: string;
+  tertiary: string;
   success: string;
   warning: string;
   error: string;
@@ -109,8 +110,8 @@ export interface ThemeContextValue {
   theme: Theme;
   mode: ThemeMode;
   toggleMode: () => void;
-  setMode: (mode: ThemeMode) => void;
-  setTheme: (theme: Theme) => void;
+  setMode: (_mode: ThemeMode) => void;
+  setTheme: (_theme: Theme) => void;
 }
 
 /**

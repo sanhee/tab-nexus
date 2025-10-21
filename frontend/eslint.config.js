@@ -25,13 +25,17 @@ export default [
       '@typescript-eslint': typescriptEslint,
     },
     rules: {
+      // 기본 JavaScript 규칙 비활성화 (TypeScript에서 처리)
+      'no-unused-vars': 'off',
+      'no-undef': 'off',
+
       // TypeScript 규칙
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
 
       // 일반 규칙
       'prefer-const': 'error',

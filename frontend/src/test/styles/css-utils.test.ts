@@ -30,6 +30,7 @@ describe('CSS 유틸리티', () => {
         colors: {
           primary: '#007acc',
           secondary: '#6c757d',
+          tertiary: '#28a745',
           success: '#28a745',
           warning: '#ffc107',
           error: '#dc3545',
@@ -54,6 +55,8 @@ describe('CSS 유틸리티', () => {
       const cssVariables = generateCSSVariables(theme);
 
       expect(cssVariables).toHaveProperty('--color-primary', '#007acc');
+      expect(cssVariables).toHaveProperty('--color-secondary', '#6c757d');
+      expect(cssVariables).toHaveProperty('--color-tertiary', '#28a745');
       expect(cssVariables).toHaveProperty('--color-background-primary', '#ffffff');
       expect(cssVariables).toHaveProperty('--color-background-secondary', '#f8f9fa');
     });

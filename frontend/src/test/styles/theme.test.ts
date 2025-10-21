@@ -17,6 +17,7 @@ describe('테마 시스템', () => {
         colors: {
           primary: '#007acc',
           secondary: '#6c757d',
+          tertiary: '#28a745',
           success: '#28a745',
           warning: '#ffc107',
           error: '#dc3545',

@@ -7,6 +7,7 @@ import type { ValidationResult } from './validation';
 const LIGHT_COLORS: ThemeColors = {
   primary: '#007acc',
   secondary: '#6c757d',
+  tertiary: '#28a745',
   success: '#28a745',
   warning: '#ffc107',
   error: '#dc3545',
@@ -33,6 +34,7 @@ const LIGHT_COLORS: ThemeColors = {
 const DARK_COLORS: ThemeColors = {
   primary: '#007acc',
   secondary: '#6c757d',
+  tertiary: '#28a745',
   success: '#28a745',
   warning: '#ffc107',
   error: '#dc3545',
@@ -113,7 +115,7 @@ export function validateTheme(theme: unknown): ValidationResult {
     };
   }
 
-  const t = theme as any;
+  const t = theme as Partial<Theme>;
   const errors: string[] = [];
 
   // 필수 필드 검증
