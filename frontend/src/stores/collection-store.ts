@@ -265,7 +265,7 @@ export const useCollectionStore = create<CollectionStore>()((set, get) => ({
       const cacheKey = `search:${trimmedQuery}`
 
       if (searchCache.has(cacheKey)) {
-        return searchCache.get(cacheKey)!
+        return searchCache.get(cacheKey) ?? []
       }
 
       const { collections } = get()

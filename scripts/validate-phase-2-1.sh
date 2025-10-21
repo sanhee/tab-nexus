@@ -4,11 +4,11 @@
 # Zustand 컬렉션 스토어 TDD 구현 검증
 
 set -e
-FRONTEND_DIR="/Users/al03176821/sideproject/tab-nexus/frontend"
 
 echo "🔍 Phase 2.1: Collection Store 검증 시작..."
 
-cd "$FRONTEND_DIR"
+# 프로젝트 루트 기준으로 frontend 디렉토리로 이동
+cd "$(dirname "$0")/../frontend"
 
 # 1. 필수 의존성 확인
 echo "📦 Zustand 의존성 확인..."
