@@ -745,4 +745,277 @@ describe('탭 스토어', () => {
       }).not.toThrow() // 마찬가지로 splice가 처리
     })
   })
+
+  describe('탭 정렬 및 검색 기능', () => {
+    test('제목으로 탭을 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '구글 검색',
+        url: 'https://google.com',
+        collectionId: 'search-test'
+      })
+
+      addTab({
+        title: '네이버 메일',
+        url: 'https://naver.com',
+        collectionId: 'search-test'
+      })
+
+      addTab({
+        title: '다음 카페',
+        url: 'https://daum.net',
+        collectionId: 'search-test'
+      })
+
+      const results = searchTabs('구글')
+      expect(results).toHaveLength(1)
+      expect(results[0].title).toBe('구글 검색')
+    })
+
+    test('URL로 탭을 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '구글 홈',
+        url: 'https://google.com/search',
+        collectionId: 'url-search-test'
+      })
+
+      addTab({
+        title: '유튜브',
+        url: 'https://youtube.com',
+        collectionId: 'url-search-test'
+      })
+
+      const results = searchTabs('google')
+      expect(results).toHaveLength(1)
+      expect(results[0].url).toContain('google.com')
+    })
+
+    test('설명으로 탭을 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '개발 도구',
+        url: 'https://developer.mozilla.org',
+        collectionId: 'desc-search-test',
+        description: 'MDN 웹 개발 문서'
+      })
+
+      addTab({
+        title: '디자인 툴',
+        url: 'https://figma.com',
+        collectionId: 'desc-search-test',
+        description: 'UI/UX 디자인 협업 도구'
+      })
+
+      const results = searchTabs('개발')
+      expect(results).toHaveLength(1)
+      expect(results[0].description).toContain('웹 개발')
+    })
+
+    test('대소문자 구분 없이 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: 'GitHub Repository',
+        url: 'https://github.com/user/repo',
+        collectionId: 'case-test'
+      })
+
+      const lowerResults = searchTabs('github')
+      const upperResults = searchTabs('GITHUB')
+      const mixedResults = searchTabs('GitHub')
+
+      expect(lowerResults).toHaveLength(1)
+      expect(upperResults).toHaveLength(1)
+      expect(mixedResults).toHaveLength(1)
+
+      expect(lowerResults[0].id).toBe(upperResults[0].id)
+      expect(upperResults[0].id).toBe(mixedResults[0].id)
+    })
+
+    test('빈 검색어나 공백만 있는 검색어는 빈 배열을 반환한다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '테스트 탭',
+        url: 'https://example.com',
+        collectionId: 'empty-search-test'
+      })
+
+      expect(searchTabs('')).toEqual([])
+      expect(searchTabs('   ')).toEqual([])
+      expect(searchTabs('\t\n  ')).toEqual([])
+    })
+
+    test('검색 결과가 없으면 빈 배열을 반환한다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '구글',
+        url: 'https://google.com',
+        collectionId: 'no-result-test'
+      })
+
+      const results = searchTabs('존재하지않는검색어')
+      expect(results).toEqual([])
+    })
+
+    test('여러 탭이 매칭되면 모든 결과를 반환한다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '구글 검색',
+        url: 'https://google.com/search',
+        collectionId: 'multi-result-test'
+      })
+
+      addTab({
+        title: '구글 드라이브',
+        url: 'https://drive.google.com',
+        collectionId: 'multi-result-test'
+      })
+
+      addTab({
+        title: '구글 메일',
+        url: 'https://mail.google.com',
+        collectionId: 'multi-result-test'
+      })
+
+      const results = searchTabs('구글')
+      expect(results).toHaveLength(3)
+
+      const titles = results.map(tab => tab.title)
+      expect(titles).toContain('구글 검색')
+      expect(titles).toContain('구글 드라이브')
+      expect(titles).toContain('구글 메일')
+    })
+
+    test('노트 타입 탭도 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '개발 노트',
+        url: '',
+        collectionId: 'note-search-test',
+        type: 'note',
+        noteContent: '# React 학습 노트\n\n훅 사용법에 대해 정리'
+      })
+
+      addTab({
+        title: '일반 탭',
+        url: 'https://example.com',
+        collectionId: 'note-search-test'
+      })
+
+      const results = searchTabs('노트')
+      expect(results).toHaveLength(1)
+      expect(results[0].type).toBe('note')
+    })
+
+    test('검색 결과 캐싱이 작동한다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      // 검색 성능을 위한 캐시 테스트
+      addTab({
+        title: '캐시 테스트',
+        url: 'https://cache-test.com',
+        collectionId: 'cache-test'
+      })
+
+      // 같은 검색어로 여러 번 검색
+      const result1 = searchTabs('캐시')
+      const result2 = searchTabs('캐시')
+      const result3 = searchTabs('캐시')
+
+      expect(result1).toEqual(result2)
+      expect(result2).toEqual(result3)
+      expect(result1).toHaveLength(1)
+    })
+
+    test('탭 추가나 삭제 후 검색 캐시가 무효화된다', () => {
+      const { addTab, removeTab, searchTabs } = useTabStore.getState()
+
+      // 첫 번째 탭 추가 후 검색
+      const tab1 = addTab({
+        title: '캐시 무효화 테스트 1',
+        url: 'https://invalidation1.com',
+        collectionId: 'cache-invalidation-test'
+      })
+
+      let results = searchTabs('무효화')
+      expect(results).toHaveLength(1)
+
+      // 두 번째 탭 추가 후 검색 (캐시 무효화되어야 함)
+      const tab2 = addTab({
+        title: '캐시 무효화 테스트 2',
+        url: 'https://invalidation2.com',
+        collectionId: 'cache-invalidation-test'
+      })
+
+      results = searchTabs('무효화')
+      expect(results).toHaveLength(2)
+
+      // 탭 삭제 후 검색 (캐시 무효화되어야 함)
+      removeTab(tab1.id)
+
+      results = searchTabs('무효화')
+      expect(results).toHaveLength(1)
+      expect(results[0].id).toBe(tab2.id)
+    })
+
+    test('특수문자가 포함된 제목으로 검색할 수 있다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: 'Stack Overflow - Q&A',
+        url: 'https://stackoverflow.com',
+        collectionId: 'special-char-test'
+      })
+
+      addTab({
+        title: 'C++ 레퍼런스',
+        url: 'https://cppreference.com',
+        collectionId: 'special-char-test'
+      })
+
+      const results1 = searchTabs('Q&A')
+      expect(results1).toHaveLength(1)
+      expect(results1[0].title).toContain('Q&A')
+
+      const results2 = searchTabs('C++')
+      expect(results2).toHaveLength(1)
+      expect(results2[0].title).toContain('C++')
+    })
+
+    test('한글과 영문 혼합 검색이 가능하다', () => {
+      const { addTab, searchTabs } = useTabStore.getState()
+
+      addTab({
+        title: '네이버 NAVER 포털',
+        url: 'https://naver.com',
+        collectionId: 'mixed-lang-test'
+      })
+
+      addTab({
+        title: 'Google 구글 검색',
+        url: 'https://google.com',
+        collectionId: 'mixed-lang-test'
+      })
+
+      const koreanResults = searchTabs('네이버')
+      expect(koreanResults).toHaveLength(1)
+      expect(koreanResults[0].title).toContain('네이버')
+
+      const englishResults = searchTabs('NAVER')
+      expect(englishResults).toHaveLength(1)
+      expect(englishResults[0].title).toContain('NAVER')
+
+      const mixedResults = searchTabs('구글')
+      expect(mixedResults).toHaveLength(1)
+      expect(mixedResults[0].title).toContain('구글')
+    })
+  })
 })
