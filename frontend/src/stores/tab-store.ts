@@ -4,6 +4,7 @@ import {
   validateTabInput,
   validateTabTitle,
   validateUrl,
+  validateDuplicateUrl,
   TabValidationError,
   TAB_ERROR_CODES
 } from '@/utils/tab-validation'
@@ -95,6 +96,10 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     validateTabInput(input)
 
     const { tabs } = get()
+
+    // 중복 URL 검증 (링크 타입만)
+    validateDuplicateUrl(input.url, input.collectionId, tabs)
+
     const now = new Date()
 
     // 해당 컬렉션의 탭 개수로 sortOrder 결정
@@ -167,14 +172,22 @@ export const useTabStore = create<TabStore>()((set, get) => ({
       throw new TabValidationError('탭을 찾을 수 없습니다', TAB_ERROR_CODES.NOT_FOUND)
     }
 
+    const existingTab = tabs[tabIndex]
+
     // 제목 검증
     if (updates.title !== undefined) {
       validateTabTitle(updates.title)
     }
 
-    // URL 검증
+    // URL 검증 (탭 타입 고려)
     if (updates.url !== undefined) {
-      validateUrl(updates.url)
+      validateUrl(updates.url, existingTab.type)
+
+      // URL이 변경되는 경우 중복 검사
+      if (updates.url !== existingTab.url) {
+        const otherTabs = tabs.filter(tab => tab.id !== id)
+        validateDuplicateUrl(updates.url, existingTab.collectionId, otherTabs)
+      }
     }
 
     const updatedTabs = tabs.map(tab =>
