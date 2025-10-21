@@ -3,8 +3,6 @@ import type { Tab, TabInput } from '@/types'
 import {
   validateTabInput,
   validateTabTitle,
-  validateUrl,
-  validateDuplicateUrl,
   validateByTabType,
   TabValidationError,
   TAB_ERROR_CODES
@@ -257,6 +255,12 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     if (fromIndex === toIndex) return
 
     const { tabs } = get()
+
+    // 탭 존재 여부 확인
+    const targetTab = tabs.find(tab => tab.id === tabId)
+    if (!targetTab) {
+      throw new TabValidationError('이동할 탭을 찾을 수 없습니다', TAB_ERROR_CODES.NOT_FOUND)
+    }
 
     // 전체 배열에서 직접 이동 (기존 테스트 호환성 유지)
     const newTabs = [...tabs]

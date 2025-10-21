@@ -197,13 +197,11 @@ export function createDebouncedFunction<T extends (...args: any[]) => any>(
 
   let timerId: NodeJS.Timeout | null = null;
   let maxTimerId: NodeJS.Timeout | null = null;
-  let lastCallTime = 0;
   let lastArgs: any[] = [];
   let lastThis: any = null;
   let hasBeenCalled = false;
 
   const debouncedFunction = function (this: any, ...args: any[]) {
-    const now = Date.now();
     lastArgs = args;
     lastThis = this;
 
@@ -242,8 +240,6 @@ export function createDebouncedFunction<T extends (...args: any[]) => any>(
         func.apply(lastThis, lastArgs);
       }
     }, normalizedDelay);
-
-    lastCallTime = now;
   } as T;
 
   return debouncedFunction;

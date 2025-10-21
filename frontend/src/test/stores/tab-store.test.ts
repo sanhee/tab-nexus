@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'vitest'
 import { useTabStore } from '@/stores/tab-store'
-import type { Tab, TabInput } from '@/types'
+import type { TabInput } from '@/types'
 
 describe('탭 스토어', () => {
   beforeEach(() => {
@@ -600,13 +600,13 @@ describe('탭 스토어', () => {
       })
 
       // 컬렉션 2의 탭들
-      const collection2Tab1 = addTab({
+      addTab({
         title: '컬렉션2 탭1',
         url: 'https://c2-tab1.com',
         collectionId: 'collection2'
       })
 
-      const collection2Tab2 = addTab({
+      addTab({
         title: '컬렉션2 탭2',
         url: 'https://c2-tab2.com',
         collectionId: 'collection2'

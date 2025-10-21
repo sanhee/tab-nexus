@@ -128,13 +128,15 @@ export function validateDuplicateUrl(
         continue
       }
 
-      if (tab.url === url) {
-        throw new TabValidationError(
-          '같은 컬렉션에 동일한 URL이 이미 존재합니다',
-          TAB_ERROR_CODES.DUPLICATE_URL
-        )
-      }
+      urlSet.add(tab.url)
     }
+  }
+
+  if (urlSet.has(url)) {
+    throw new TabValidationError(
+      '같은 컬렉션에 동일한 URL이 이미 존재합니다',
+      TAB_ERROR_CODES.DUPLICATE_URL
+    )
   }
 }
 

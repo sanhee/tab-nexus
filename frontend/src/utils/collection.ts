@@ -1,6 +1,6 @@
 import type { Collection } from '../types/index.js';
 import type { ValidationResult } from './validation.js';
-import { generateId } from './id.js';
+import { generateCollectionId } from './id.js';
 import {
   validate,
   required,
@@ -76,7 +76,7 @@ export function createCollection(title: string, sortOrder = 0): Collection {
   const now = new Date();
 
   return {
-    id: generateId('col'),
+    id: generateCollectionId(),
     title: title.trim(),
     isExpanded: false,
     sortOrder,
