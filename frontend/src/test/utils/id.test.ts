@@ -1,7 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   generateId,
-  isValidId,
   generateUuid,
   generateShortId,
   generateReadableId,

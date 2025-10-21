@@ -5,7 +5,7 @@
 **개발 방법론**: TDD (Test-Driven Development)
 **기술 스택**: React 18 + TypeScript 5 + Vite + Zustand
 **시작일**: 2024-10-19
-**현재 Phase**: Phase 1 (프로젝트 설정 및 기본 구조)
+**현재 Phase**: Phase 2 (상태 관리 및 데이터 레이어)
 
 ---
 
@@ -76,7 +76,12 @@
 ### ✅ Phase 1.3 완료: CSS 설정 및 테마 시스템 (TDD)
 **Phase 1.3: CSS 설정 및 테마 시스템 (TDD)**
 **상태**: ✅ **완료** - 완전한 TDD 사이클 수행 (Red-Green-Refactor)
-**다음 작업**: Phase 2 상태 관리 및 데이터 레이어
+
+### ✅ Phase 2.1 완료: Zustand 컬렉션 스토어 (TDD)
+**Phase 2.1: Zustand 컬렉션 스토어 (TDD)**
+**상태**: ✅ **완료** - 완전한 TDD 사이클 수행 (Red-Green-Refactor)
+**브랜치**: `feature/phase-2.1-collection-store`
+**다음 작업**: Phase 2.2 상태 지속성 및 동기화
 
 #### Phase 1.3 TDD 사이클 완료 (2024-10-20)
 1. ✅ **테마 시스템 TDD 사이클 완료**
