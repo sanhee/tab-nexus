@@ -1,23 +1,18 @@
 import { create } from 'zustand'
 import type { Tab, TabInput } from '@/types'
+import {
+  validateTabInput,
+  validateTabTitle,
+  validateUrl,
+  TabValidationError,
+  TAB_ERROR_CODES
+} from '@/utils/tab-validation'
+import { generateId } from '@/utils/id'
 
 /**
  * 탭 업데이트 가능한 필드
  */
 type TabUpdates = Partial<Pick<Tab, 'title' | 'url' | 'description' | 'noteContent' | 'tags'>>
-
-/**
- * 탭 검증 에러 타입
- */
-class TabError extends Error {
-  code: string
-
-  constructor(message: string, code: string) {
-    super(message)
-    this.name = 'TabError'
-    this.code = code
-  }
-}
 
 /**
  * 탭 스토어 인터페이스
@@ -47,65 +42,48 @@ interface TabStore {
 }
 
 /**
- * 탭 제목 검증
+ * 탭 캐시 관리 클래스
  */
-const validateTabTitle = (title: string): void => {
-  if (typeof title !== 'string') {
-    throw new TabError('제목은 문자열이어야 합니다', 'INVALID_TYPE')
+class TabCacheManager {
+  private tabCache = new Map<string, Tab>()
+  private searchCache = new Map<string, Tab[]>()
+
+  getTab(id: string): Tab | undefined {
+    return this.tabCache.get(id)
   }
 
-  const trimmedTitle = title.trim()
-  if (!trimmedTitle) {
-    throw new TabError('탭 제목은 필수입니다', 'REQUIRED')
+  setTab(id: string, tab: Tab): void {
+    this.tabCache.set(id, tab)
   }
 
-  if (trimmedTitle.length > 200) {
-    throw new TabError('탭 제목은 200자 이하여야 합니다', 'TOO_LONG')
-  }
-}
-
-/**
- * URL 검증
- */
-const validateUrl = (url: string): void => {
-  if (typeof url !== 'string' || !url.trim()) {
-    throw new TabError('유효한 URL이 필요합니다', 'INVALID_URL')
+  getSearchResults(query: string): Tab[] | undefined {
+    return this.searchCache.get(query)
   }
 
-  try {
-    new URL(url)
-  } catch {
-    throw new TabError('올바른 URL 형식이 아닙니다', 'INVALID_URL_FORMAT')
+  setSearchResults(query: string, results: Tab[]): void {
+    this.searchCache.set(query, results)
   }
-}
 
-/**
- * 컬렉션 ID 검증
- */
-const validateCollectionId = (collectionId: string): void => {
-  if (typeof collectionId !== 'string' || !collectionId.trim()) {
-    throw new TabError('유효한 컬렉션 ID가 필요합니다', 'INVALID_COLLECTION_ID')
+  clearTab(id: string): void {
+    this.tabCache.delete(id)
   }
-}
 
-/**
- * UUID 생성 (crypto API 사용)
- */
-const generateId = (): string => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
+  clearAll(): void {
+    this.tabCache.clear()
+    this.searchCache.clear()
   }
-  // Fallback for older environments
-  return 'tab-' + Math.random().toString(36).substring(2) + Date.now().toString(36)
+
+  clearSearch(): void {
+    this.searchCache.clear()
+  }
 }
 
 const initialState = {
   tabs: [] as Tab[],
 }
 
-// 캐시를 위한 Map (메모리 효율성)
-const tabCache = new Map<string, Tab>()
-const searchCache = new Map<string, Tab[]>()
+// 캐시 매니저 인스턴스
+const cacheManager = new TabCacheManager()
 
 export const useTabStore = create<TabStore>()((set, get) => ({
   ...initialState,
@@ -114,9 +92,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
    * 새 탭 추가
    */
   addTab: (input: TabInput): Tab => {
-    validateTabTitle(input.title)
-    validateUrl(input.url)
-    validateCollectionId(input.collectionId)
+    validateTabInput(input)
 
     const { tabs } = get()
     const now = new Date()
@@ -143,8 +119,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     set({ tabs: [...tabs, newTab] })
 
     // 캐시 무효화
-    tabCache.clear()
-    searchCache.clear()
+    cacheManager.clearAll()
 
     return newTab
   },
@@ -157,7 +132,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     const tabIndex = tabs.findIndex(tab => tab.id === id)
 
     if (tabIndex === -1) {
-      throw new TabError('탭을 찾을 수 없습니다', 'NOT_FOUND')
+      throw new TabValidationError('탭을 찾을 수 없습니다', TAB_ERROR_CODES.NOT_FOUND)
     }
 
     const removedTab = tabs[tabIndex]
@@ -178,8 +153,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     set({ tabs: reorderedTabs })
 
     // 캐시 무효화
-    tabCache.clear()
-    searchCache.clear()
+    cacheManager.clearAll()
   },
 
   /**
@@ -190,7 +164,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     const tabIndex = tabs.findIndex(tab => tab.id === id)
 
     if (tabIndex === -1) {
-      throw new TabError('탭을 찾을 수 없습니다', 'NOT_FOUND')
+      throw new TabValidationError('탭을 찾을 수 없습니다', TAB_ERROR_CODES.NOT_FOUND)
     }
 
     // 제목 검증
@@ -212,8 +186,8 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     set({ tabs: updatedTabs })
 
     // 캐시 무효화
-    tabCache.delete(id)
-    searchCache.clear()
+    cacheManager.clearTab(id)
+    cacheManager.clearSearch()
   },
 
   /**
@@ -239,22 +213,23 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     set({ tabs: updatedTabs })
 
     // 캐시 무효화
-    tabCache.clear()
+    cacheManager.clearAll()
   },
 
   /**
    * ID로 탭 조회 (캐시 적용)
    */
   getTabById: (id: string): Tab | undefined => {
-    if (tabCache.has(id)) {
-      return tabCache.get(id)
+    const cachedTab = cacheManager.getTab(id)
+    if (cachedTab) {
+      return cachedTab
     }
 
     const { tabs } = get()
     const tab = tabs.find(t => t.id === id)
 
     if (tab) {
-      tabCache.set(id, tab)
+      cacheManager.setTab(id, tab)
     }
 
     return tab
@@ -286,8 +261,9 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     const trimmedQuery = query.trim().toLowerCase()
     const cacheKey = `search:${trimmedQuery}`
 
-    if (searchCache.has(cacheKey)) {
-      return searchCache.get(cacheKey) ?? []
+    const cachedResults = cacheManager.getSearchResults(cacheKey)
+    if (cachedResults) {
+      return cachedResults
     }
 
     const { tabs } = get()
@@ -297,7 +273,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
       (tab.description && tab.description.toLowerCase().includes(trimmedQuery))
     )
 
-    searchCache.set(cacheKey, results)
+    cacheManager.setSearchResults(cacheKey, results)
     return results
   },
 
@@ -327,7 +303,6 @@ export const useTabStore = create<TabStore>()((set, get) => ({
    */
   reset: (): void => {
     set(initialState)
-    tabCache.clear()
-    searchCache.clear()
+    cacheManager.clearAll()
   },
 }))
