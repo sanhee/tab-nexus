@@ -14,7 +14,7 @@ import type {
 export function generateCSSVariables(theme: Partial<Theme>): CSSVariableMap {
   const cssVars: CSSVariableMap = {};
 
-  function flattenObject(obj: any, prefix = ''): void {
+  function flattenObject(obj: Record<string, unknown> | object, prefix = ''): void {
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         flattenObject(value, `${prefix}${key}-`);

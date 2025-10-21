@@ -238,7 +238,7 @@ export function parseDate(dateStr: string): Date {
  * @param date 검증할 값
  * @returns Date 객체이고 유효한 날짜인지 여부
  */
-export function isValidDate(date: any): date is Date {
+export function isValidDate(date: unknown): date is Date {
   return date instanceof Date && !isNaN(date.getTime());
 }
 

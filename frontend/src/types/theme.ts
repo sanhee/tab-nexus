@@ -110,8 +110,8 @@ export interface ThemeContextValue {
   theme: Theme;
   mode: ThemeMode;
   toggleMode: () => void;
-  setMode: (mode: ThemeMode) => void;
-  setTheme: (theme: Theme) => void;
+  setMode: (_mode: ThemeMode) => void;
+  setTheme: (_theme: Theme) => void;
 }
 
 /**
