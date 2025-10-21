@@ -323,7 +323,7 @@ describe('탭 스토어', () => {
   })
 
   describe('탭 수정 기능', () => {
-    test('탭 제목을 수정할 수 있다', () => {
+    test('탭 제목을 수정할 수 있다', async () => {
       const { addTab, updateTab, getTabById } = useTabStore.getState()
 
       const tabInput: TabInput = {
@@ -333,6 +333,10 @@ describe('탭 스토어', () => {
       }
 
       const newTab = addTab(tabInput)
+
+      // 시간 차이를 보장하기 위해 잠시 대기
+      await new Promise(resolve => setTimeout(resolve, 1))
+
       updateTab(newTab.id, { title: '수정된 제목' })
 
       const updatedTab = getTabById(newTab.id)
