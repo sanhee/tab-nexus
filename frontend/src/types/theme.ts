@@ -10,6 +10,7 @@ export type ThemeMode = 'light' | 'dark';
 export interface ThemeColors {
   primary: string;
   secondary: string;
+  tertiary: string;
   success: string;
   warning: string;
   error: string;

@@ -40,17 +40,39 @@ git commit -m "feat: your changes"
 This project follows **strict Test-Driven Development** with Red-Green-Refactor cycles:
 
 1. **🔴 Red**: Write failing tests in Korean
-   - `git commit -m "test: [feature] 실패 테스트 작성"`
+   - **CRITICAL**: `./scripts/tdd-workflow.sh red` - 검증 스크립트 실행
+   - TypeScript 타입 체크: `npx tsc --noEmit`
+   - 테스트 실패 확인: `npm test` (실패해야 정상)
+   - `git commit -m "🔴 test: [feature] 실패 테스트 작성"`
+
 2. **🟢 Green**: Implement minimum code to pass tests
-   - `git commit -m "feat: [feature] 기본 구현"`
+   - **CRITICAL**: `./scripts/tdd-workflow.sh green` - 검증 스크립트 실행
+   - 의존성 확인: `npm ls [package]`
+   - 컴파일 확인: `npm run build`
+   - 테스트 통과: `npm test`
+   - `git commit -m "🟢 feat: [feature] 기본 구현"`
+
 3. **🔵 Refactor**: Improve code quality while keeping tests green
-   - `git commit -m "refactor: [feature] 최적화"`
+   - **CRITICAL**: `./scripts/tdd-workflow.sh refactor` - 검증 스크립트 실행
+   - 품질 검사: `npm run lint && npm run build && npm test`
+   - 커버리지 확인: `npm run test:coverage`
+   - `git commit -m "🔵 refactor: [feature] 최적화"`
+
 4. **📋 PR**: Create Pull Request for completed feature
    - `git push -u origin feature/[name]`
    - `gh pr create --title "[Phase X.Y]: [Feature Name] 완료 (TDD)" --body "..."`
 
 **Total planned commits: 315 across 105 TDD cycles over 10 phases**
 **NEVER FORGET: Always create PR after completing each phase/feature!**
+
+### ⚠️ 필수 검증 프로세스
+**모든 단계에서 다음을 반드시 실행:**
+1. `./scripts/tdd-workflow.sh [phase]` - 자동 검증
+2. **Red Phase**: 테스트 실패 확인 필수
+3. **Green Phase**: 컴파일 + 테스트 통과 필수
+4. **Refactor Phase**: 품질 + 커버리지 확인 필수
+
+**검증 없이 다음 단계로 진행 금지!**
 
 ### Front-End Code Organization
 ```
@@ -111,6 +133,94 @@ describe('컬렉션 타입 검증', () => {
 - Prettier formatted
 - TypeScript strict mode compliance
 - 90%+ test coverage target
+
+## Error Detection and Fixing Process
+
+### 🚨 Critical Rule: NEVER Ignore TypeScript Compilation Errors
+사용자가 발견하기 전에 모든 에러를 사전에 탐지하고 수정해야 함.
+
+### Error Detection Workflow
+1. **실시간 검증**: 각 코드 변경 후 즉시 `npm run build` 실행
+2. **에러 분류**: 컴파일 에러를 카테고리별로 분류
+3. **체계적 수정**: 에러 타입별 표준 수정 절차 적용
+4. **검증 완료**: 모든 에러 수정 후 빌드 성공 확인
+
+### Common TypeScript Error Patterns & Fixes
+
+#### 1. Import/Export Errors
+```typescript
+// ❌ Error: 'SomeType' is declared but never used
+import { SomeType, usedFunction } from './module'
+
+// ✅ Fix: Remove unused imports
+import { usedFunction } from './module'
+
+// ❌ Error: Must use type-only import
+import { TypeName } from './types'
+
+// ✅ Fix: Use type-only import
+import type { TypeName } from './types'
+```
+
+#### 2. Interface Property Errors
+```typescript
+// ❌ Error: Property 'tertiary' is missing
+interface Colors {
+  primary: string;
+  secondary: string;
+  // tertiary: string; // Missing!
+}
+
+// ✅ Fix: Add missing properties to all implementations
+```
+
+#### 3. Unused Variable Errors
+```typescript
+// ❌ Error: 'unusedVar' is declared but never used
+function example() {
+  const unusedVar = getValue();
+  const usedVar = getOtherValue();
+  return usedVar;
+}
+
+// ✅ Fix: Remove unused variables
+function example() {
+  const usedVar = getOtherValue();
+  return usedVar;
+}
+```
+
+### Error Fixing Priority Order
+1. **Type Definition Errors**: Fix interface/type mismatches first
+2. **Import/Export Errors**: Clean up unused imports
+3. **Property Missing Errors**: Add required properties
+4. **Unused Variable Errors**: Remove or use variables
+5. **Logic Errors**: Fix business logic issues
+
+### Validation Commands
+```bash
+# 1. TypeScript compilation check
+npm run build
+
+# 2. Specific file type check
+npx tsc --noEmit --skipLibCheck [filename]
+
+# 3. Test specific file
+npm test [test-file-path]
+
+# 4. ESLint check
+npm run lint
+
+# 5. Phase-specific validation
+./scripts/validate-phase-2-1.sh
+```
+
+### Process Improvement Notes
+- **Always run build after any code change**
+- **Fix errors in systematic order (types → imports → variables)**
+- **Use IDE diagnostics to catch errors early**
+- **Create focused validation scripts for specific phases**
+- **Document error patterns for future reference**
 
 ## Validation Pattern
 

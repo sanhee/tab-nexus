@@ -26,15 +26,6 @@ const URL_PATTERNS = {
   relativePath: /^\.{0,2}\//
 } as const;
 
-// 에러 메시지 상수화 (일관성 및 국제화 준비)
-const URL_ERRORS = {
-  INVALID_URL: 'URL 형식이 올바르지 않습니다',
-  UNSAFE_PROTOCOL: '안전하지 않은 프로토콜입니다',
-  INVALID_DOMAIN: '유효하지 않은 도메인입니다',
-  URL_TOO_LONG: 'URL이 너무 깁니다',
-  INVALID_PORT: '유효하지 않은 포트 번호입니다'
-} as const;
-
 // URL 관련 상수들 (성능 및 유지보수성 향상)
 const URL_CONSTANTS = {
   // RFC 3986 권장 최대 길이

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import type { Theme, ThemeColors, ThemeMode } from '@/types/theme';
+import type { Theme, ThemeMode } from '@/types/theme';
 import {
   createTheme,
   validateTheme,
@@ -17,6 +17,7 @@ describe('테마 시스템', () => {
         colors: {
           primary: '#007acc',
           secondary: '#6c757d',
+          tertiary: '#28a745',
           success: '#28a745',
           warning: '#ffc107',
           error: '#dc3545',

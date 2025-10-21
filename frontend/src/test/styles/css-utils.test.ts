@@ -14,8 +14,6 @@ import {
 import type { Theme, CSSVariableMap, ResponsiveBreakpoints } from '@/types/theme';
 
 describe('CSS 유틸리티', () => {
-  let mockDocument: Document;
-
   beforeEach(() => {
     // DOM 환경 초기화
     document.documentElement.style.cssText = '';
@@ -31,9 +29,25 @@ describe('CSS 유틸리티', () => {
       const theme: Partial<Theme> = {
         colors: {
           primary: '#007acc',
+          secondary: '#6c757d',
+          tertiary: '#28a745',
+          success: '#28a745',
+          warning: '#ffc107',
+          error: '#dc3545',
           background: {
             primary: '#ffffff',
-            secondary: '#f8f9fa'
+            secondary: '#f8f9fa',
+            tertiary: '#e9ecef'
+          },
+          text: {
+            primary: '#212529',
+            secondary: '#6c757d',
+            tertiary: '#adb5bd'
+          },
+          border: {
+            primary: '#dee2e6',
+            secondary: '#e9ecef',
+            focus: '#007acc'
           }
         }
       };
@@ -41,6 +55,8 @@ describe('CSS 유틸리티', () => {
       const cssVariables = generateCSSVariables(theme);
 
       expect(cssVariables).toHaveProperty('--color-primary', '#007acc');
+      expect(cssVariables).toHaveProperty('--color-secondary', '#6c757d');
+      expect(cssVariables).toHaveProperty('--color-tertiary', '#28a745');
       expect(cssVariables).toHaveProperty('--color-background-primary', '#ffffff');
       expect(cssVariables).toHaveProperty('--color-background-secondary', '#f8f9fa');
     });
@@ -48,12 +64,22 @@ describe('CSS 유틸리티', () => {
     test('중첩된 객체를 올바른 CSS 변수명으로 변환해야 한다', () => {
       const theme: Partial<Theme> = {
         typography: {
+          fontFamily: {
+            primary: 'Inter, system-ui, sans-serif',
+            mono: 'Menlo, Monaco, Consolas, monospace'
+          },
           fontSize: {
+            xs: '0.75rem',
+            sm: '0.875rem',
             base: '1rem',
-            lg: '1.125rem'
+            lg: '1.125rem',
+            xl: '1.25rem',
+            '2xl': '1.5rem'
           },
           fontWeight: {
             normal: '400',
+            medium: '500',
+            semibold: '600',
             bold: '700'
           }
         }

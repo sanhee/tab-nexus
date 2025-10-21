@@ -183,7 +183,7 @@ export function formatRelativeTime(date: Date, baseDate: Date = new Date()): str
 
   // 적절한 시간 단위 찾기
   for (let i = 0; i < timeRanges.length; i++) {
-    const { threshold, unit, label } = timeRanges[i];
+    const { unit, label } = timeRanges[i];
     const nextThreshold = timeRanges[i + 1]?.threshold ?? TIME_UNITS.YEAR;
 
     if (absDiff < nextThreshold) {

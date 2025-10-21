@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest'
 import { useCollectionStore } from '@/stores/collection-store'
-import { Collection } from '@/types'
 
 describe('컬렉션 스토어', () => {
   beforeEach(() => {
