@@ -170,4 +170,155 @@ describe('탭 스토어', () => {
       expect(getAllTabs()).toHaveLength(0)
     })
   })
+
+  describe('고급 탭 추가 기능', () => {
+    test('노트 타입 탭을 추가할 수 있다', () => {
+      const { addTab, getTabById } = useTabStore.getState()
+
+      const noteTabInput: TabInput = {
+        title: '개발 노트',
+        url: '', // 노트 타입은 빈 URL 허용
+        collectionId: 'notes-collection',
+        type: 'note',
+        noteContent: '# 개발 노트\n\n오늘의 학습 내용...'
+      }
+
+      const newTab = addTab(noteTabInput)
+      const savedTab = getTabById(newTab.id)
+
+      expect(savedTab).toBeDefined()
+      expect(savedTab!.type).toBe('note')
+      expect(savedTab!.noteContent).toBe('# 개발 노트\n\n오늘의 학습 내용...')
+      expect(savedTab!.url).toBe('')
+    })
+
+    test('중복된 URL로는 같은 컬렉션에 탭을 추가할 수 없다', () => {
+      const { addTab } = useTabStore.getState()
+      const collectionId = 'test-collection'
+
+      const firstTab: TabInput = {
+        title: '첫 번째 구글',
+        url: 'https://google.com',
+        collectionId
+      }
+
+      const duplicateTab: TabInput = {
+        title: '두 번째 구글',
+        url: 'https://google.com',
+        collectionId
+      }
+
+      // 첫 번째 탭 추가는 성공
+      addTab(firstTab)
+
+      // 같은 URL로 두 번째 탭 추가는 실패
+      expect(() => {
+        addTab(duplicateTab)
+      }).toThrow('같은 컬렉션에 동일한 URL이 이미 존재합니다')
+    })
+
+    test('다른 컬렉션에는 같은 URL을 추가할 수 있다', () => {
+      const { addTab, getTabsByCollection } = useTabStore.getState()
+
+      const tab1: TabInput = {
+        title: '컬렉션1의 구글',
+        url: 'https://google.com',
+        collectionId: 'collection1'
+      }
+
+      const tab2: TabInput = {
+        title: '컬렉션2의 구글',
+        url: 'https://google.com',
+        collectionId: 'collection2'
+      }
+
+      addTab(tab1)
+      addTab(tab2)
+
+      const collection1Tabs = getTabsByCollection('collection1')
+      const collection2Tabs = getTabsByCollection('collection2')
+
+      expect(collection1Tabs).toHaveLength(1)
+      expect(collection2Tabs).toHaveLength(1)
+    })
+
+    test('탭에 태그를 추가할 수 있다', () => {
+      const { addTab, getTabById } = useTabStore.getState()
+
+      const tabWithTags: TabInput = {
+        title: '태그가 있는 탭',
+        url: 'https://example.com',
+        collectionId: 'test-collection',
+        tags: ['개발', '학습', 'React']
+      }
+
+      const newTab = addTab(tabWithTags)
+      const savedTab = getTabById(newTab.id)
+
+      expect(savedTab!.tags).toEqual(['개발', '학습', 'React'])
+    })
+
+    test('탭 추가 시 sortOrder가 자동으로 설정된다', () => {
+      const { addTab, getTabsByCollection } = useTabStore.getState()
+      const collectionId = 'order-test'
+
+      const tab1: TabInput = {
+        title: '첫 번째 탭',
+        url: 'https://first.com',
+        collectionId
+      }
+
+      const tab2: TabInput = {
+        title: '두 번째 탭',
+        url: 'https://second.com',
+        collectionId
+      }
+
+      const tab3: TabInput = {
+        title: '세 번째 탭',
+        url: 'https://third.com',
+        collectionId
+      }
+
+      addTab(tab1)
+      addTab(tab2)
+      addTab(tab3)
+
+      const tabs = getTabsByCollection(collectionId)
+
+      expect(tabs[0].sortOrder).toBe(0)
+      expect(tabs[1].sortOrder).toBe(1)
+      expect(tabs[2].sortOrder).toBe(2)
+    })
+
+    test('탭 제목이 자동으로 트림된다', () => {
+      const { addTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '  공백이 있는 제목  ',
+        url: 'https://example.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      const savedTab = getTabById(newTab.id)
+
+      expect(savedTab!.title).toBe('공백이 있는 제목')
+    })
+
+    test('URL 정규화가 올바르게 작동한다', () => {
+      const { addTab, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: 'HTTP 사이트',
+        url: 'http://example.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      const savedTab = getTabById(newTab.id)
+
+      expect(savedTab!.url).toBe('http://example.com')
+    })
+  })
 })
