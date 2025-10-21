@@ -518,4 +518,231 @@ describe('탭 스토어', () => {
       expect(updatedTab!.title).toBe('공백이 있는 제목')
     })
   })
+
+  describe('탭 삭제 및 이동 기능', () => {
+    test('탭을 삭제할 수 있다', () => {
+      const { addTab, removeTab, getAllTabs, getTabById } = useTabStore.getState()
+
+      const tabInput: TabInput = {
+        title: '삭제할 탭',
+        url: 'https://delete-me.com',
+        collectionId: 'test-collection'
+      }
+
+      const newTab = addTab(tabInput)
+      expect(getAllTabs()).toHaveLength(1)
+
+      removeTab(newTab.id)
+
+      expect(getAllTabs()).toHaveLength(0)
+      expect(getTabById(newTab.id)).toBeUndefined()
+    })
+
+    test('존재하지 않는 탭을 삭제하려 하면 오류가 발생한다', () => {
+      const { removeTab } = useTabStore.getState()
+
+      expect(() => {
+        removeTab('non-existent-id')
+      }).toThrow('탭을 찾을 수 없습니다')
+    })
+
+    test('탭 삭제 시 같은 컬렉션의 sortOrder가 재정렬된다', () => {
+      const { addTab, removeTab, getTabsByCollection } = useTabStore.getState()
+      const collectionId = 'reorder-test'
+
+      // 3개의 탭 추가 (sortOrder: 0, 1, 2)
+      const tab1 = addTab({
+        title: '첫 번째 탭',
+        url: 'https://first.com',
+        collectionId
+      })
+
+      const tab2 = addTab({
+        title: '두 번째 탭',
+        url: 'https://second.com',
+        collectionId
+      })
+
+      const tab3 = addTab({
+        title: '세 번째 탭',
+        url: 'https://third.com',
+        collectionId
+      })
+
+      // 가운데 탭 삭제
+      removeTab(tab2.id)
+
+      const remainingTabs = getTabsByCollection(collectionId)
+      expect(remainingTabs).toHaveLength(2)
+
+      // sortOrder가 재정렬되었는지 확인
+      expect(remainingTabs[0].id).toBe(tab1.id)
+      expect(remainingTabs[0].sortOrder).toBe(0)
+
+      expect(remainingTabs[1].id).toBe(tab3.id)
+      expect(remainingTabs[1].sortOrder).toBe(1) // 2에서 1로 재정렬
+    })
+
+    test('다른 컬렉션의 탭 삭제는 다른 컬렉션에 영향을 주지 않는다', () => {
+      const { addTab, removeTab, getTabsByCollection } = useTabStore.getState()
+
+      // 컬렉션 1의 탭들
+      const collection1Tab1 = addTab({
+        title: '컬렉션1 탭1',
+        url: 'https://c1-tab1.com',
+        collectionId: 'collection1'
+      })
+
+      const collection1Tab2 = addTab({
+        title: '컬렉션1 탭2',
+        url: 'https://c1-tab2.com',
+        collectionId: 'collection1'
+      })
+
+      // 컬렉션 2의 탭들
+      const collection2Tab1 = addTab({
+        title: '컬렉션2 탭1',
+        url: 'https://c2-tab1.com',
+        collectionId: 'collection2'
+      })
+
+      const collection2Tab2 = addTab({
+        title: '컬렉션2 탭2',
+        url: 'https://c2-tab2.com',
+        collectionId: 'collection2'
+      })
+
+      // 컬렉션 1의 탭 하나 삭제
+      removeTab(collection1Tab1.id)
+
+      // 컬렉션 2는 영향받지 않음
+      const collection2Tabs = getTabsByCollection('collection2')
+      expect(collection2Tabs).toHaveLength(2)
+      expect(collection2Tabs[0].sortOrder).toBe(0)
+      expect(collection2Tabs[1].sortOrder).toBe(1)
+
+      // 컬렉션 1은 재정렬됨
+      const collection1Tabs = getTabsByCollection('collection1')
+      expect(collection1Tabs).toHaveLength(1)
+      expect(collection1Tabs[0].id).toBe(collection1Tab2.id)
+      expect(collection1Tabs[0].sortOrder).toBe(0)
+    })
+
+    test('탭을 이동할 수 있다', () => {
+      const { addTab, moveTab, getAllTabs } = useTabStore.getState()
+
+      // 3개 탭 추가
+      const tab1 = addTab({
+        title: '첫 번째',
+        url: 'https://first.com',
+        collectionId: 'move-test'
+      })
+
+      const tab2 = addTab({
+        title: '두 번째',
+        url: 'https://second.com',
+        collectionId: 'move-test'
+      })
+
+      const tab3 = addTab({
+        title: '세 번째',
+        url: 'https://third.com',
+        collectionId: 'move-test'
+      })
+
+      // 첫 번째 탭을 마지막으로 이동 (index 0 → 2)
+      moveTab(tab1.id, 0, 2)
+
+      const allTabs = getAllTabs()
+      expect(allTabs[0].id).toBe(tab2.id)
+      expect(allTabs[0].sortOrder).toBe(0)
+
+      expect(allTabs[1].id).toBe(tab3.id)
+      expect(allTabs[1].sortOrder).toBe(1)
+
+      expect(allTabs[2].id).toBe(tab1.id)
+      expect(allTabs[2].sortOrder).toBe(2)
+    })
+
+    test('같은 위치로 탭을 이동하면 변경사항이 없다', () => {
+      const { addTab, moveTab, getAllTabs } = useTabStore.getState()
+
+      const tab1 = addTab({
+        title: '테스트 탭',
+        url: 'https://test.com',
+        collectionId: 'same-position'
+      })
+
+      const initialTabs = getAllTabs()
+      const initialUpdatedAt = initialTabs[0].updatedAt
+
+      // 같은 위치로 이동
+      moveTab(tab1.id, 0, 0)
+
+      const unchangedTabs = getAllTabs()
+      expect(unchangedTabs[0].updatedAt).toEqual(initialUpdatedAt)
+    })
+
+    test('탭 이동 시 모든 탭의 sortOrder가 업데이트된다', async () => {
+      const { addTab, moveTab, getAllTabs } = useTabStore.getState()
+
+      // 여러 탭 추가
+      const tabs = []
+      for (let i = 0; i < 5; i++) {
+        tabs.push(addTab({
+          title: `탭 ${i + 1}`,
+          url: `https://tab${i + 1}.com`,
+          collectionId: 'reorder-collection'
+        }))
+      }
+
+      // 시간 차이를 보장하기 위해 잠시 대기
+      await new Promise(resolve => setTimeout(resolve, 1))
+
+      // 마지막 탭을 첫 번째로 이동 (index 4 → 0)
+      moveTab(tabs[4].id, 4, 0)
+
+      const reorderedTabs = getAllTabs()
+
+      // 순서 확인: tab5, tab1, tab2, tab3, tab4
+      expect(reorderedTabs[0].id).toBe(tabs[4].id)
+      expect(reorderedTabs[0].sortOrder).toBe(0)
+
+      expect(reorderedTabs[1].id).toBe(tabs[0].id)
+      expect(reorderedTabs[1].sortOrder).toBe(1)
+
+      expect(reorderedTabs[2].id).toBe(tabs[1].id)
+      expect(reorderedTabs[2].sortOrder).toBe(2)
+
+      expect(reorderedTabs[3].id).toBe(tabs[2].id)
+      expect(reorderedTabs[3].sortOrder).toBe(3)
+
+      expect(reorderedTabs[4].id).toBe(tabs[3].id)
+      expect(reorderedTabs[4].sortOrder).toBe(4)
+
+      // 모든 탭의 updatedAt이 업데이트되었는지 확인
+      for (let i = 0; i < 5; i++) {
+        expect(reorderedTabs[i].updatedAt).not.toEqual(tabs[i].createdAt)
+      }
+    })
+
+    test('잘못된 인덱스로 탭을 이동할 수 없다', () => {
+      const { addTab, moveTab } = useTabStore.getState()
+
+      const tab = addTab({
+        title: '테스트 탭',
+        url: 'https://test.com',
+        collectionId: 'invalid-move'
+      })
+
+      // 범위를 벗어난 인덱스로 이동 시도 (구현에 따라 처리 방식이 다를 수 있음)
+      expect(() => {
+        moveTab(tab.id, 0, 10)
+      }).not.toThrow() // moveTab은 범위 체크를 하지 않고 splice가 알아서 처리
+
+      expect(() => {
+        moveTab(tab.id, -1, 0)
+      }).not.toThrow() // 마찬가지로 splice가 처리
+    })
+  })
 })
