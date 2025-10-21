@@ -36,27 +36,46 @@ git commit -m "feat: your changes"
 - **`/frontend`**: React application with strict TypeScript and TDD methodology
 - **`/docs`**: Critical documentation - always check git log and `WORK_PROGRESS.md` first for current status and `WBS.md`, `PROJECT_SPECIFICATION.md`, `DEVELOPMENT_MISTAKE.md`
 
-### TDD Development Cycle
+### TDD Development Cycle with GitHub Issue Integration
+
+**🔥 NEW CONVENTION (Phase 2.2부터 적용)**: 모든 커밋 메시지 앞에 GitHub Issue 번호 포함
+```bash
+git commit -m "[#이슈번호] 타입: 변경사항"
+```
+
 This project follows **strict Test-Driven Development** with Red-Green-Refactor cycles:
 
 1. **🔴 Red**: Write failing tests in Korean
    - **CRITICAL**: `./scripts/tdd-workflow.sh red` - 검증 스크립트 실행
    - TypeScript 타입 체크: `npx tsc --noEmit`
    - 테스트 실패 확인: `npm test` (실패해야 정상)
-   - `git commit -m "🔴 test: [feature] 실패 테스트 작성"`
+   - `git commit -m "[#이슈번호] 🔴 test: [feature] 실패 테스트 작성"`
 
 2. **🟢 Green**: Implement minimum code to pass tests
    - **CRITICAL**: `./scripts/tdd-workflow.sh green` - 검증 스크립트 실행
    - 의존성 확인: `npm ls [package]`
    - 컴파일 확인: `npm run build`
    - 테스트 통과: `npm test`
-   - `git commit -m "🟢 feat: [feature] 기본 구현"`
+   - `git commit -m "[#이슈번호] 🟢 feat: [feature] 기본 구현"`
 
 3. **🔵 Refactor**: Improve code quality while keeping tests green
    - **CRITICAL**: `./scripts/tdd-workflow.sh refactor` - 검증 스크립트 실행
    - 품질 검사: `npm run lint && npm run build && npm test`
    - 커버리지 확인: `npm run test:coverage`
-   - `git commit -m "🔵 refactor: [feature] 최적화"`
+   - `git commit -m "[#이슈번호] 🔵 refactor: [feature] 최적화"`
+
+### 📋 **커밋 메시지 예시**
+```bash
+# TDD 사이클 커밋
+git commit -m "[#8] 🔴 test: 탭 스토어 CRUD 실패 테스트 작성"
+git commit -m "[#8] 🟢 feat: 탭 스토어 기본 CRUD 구현"
+git commit -m "[#8] 🔵 refactor: 탭 스토어 성능 최적화 및 캐싱"
+
+# 일반 커밋 (모든 타입에 이슈 번호 포함)
+git commit -m "[#8] fix: TypeScript 컴파일 에러 수정"
+git commit -m "[#8] docs: API 문서 업데이트"
+git commit -m "[#8] chore: 의존성 업데이트"
+```
 
 4. **📋 PR**: Create Pull Request for completed feature
    - `git push -u origin feature/[name]`
@@ -221,6 +240,95 @@ npm run lint
 - **Use IDE diagnostics to catch errors early**
 - **Create focused validation scripts for specific phases**
 - **Document error patterns for future reference**
+
+## 🚨 Critical Mistake Prevention Process
+
+### Phase 2.1 실수 분석 및 개선 방안
+
+#### 📋 **발생한 실수들 (Phase 2.1)**
+
+**1. PR 템플릿 미준수 (2회)**
+- ❌ 실수: 사용자 템플릿 무시하고 자체 형식 사용
+- 🔍 원인: 템플릿 확인 없이 추측으로 작성
+- 📝 사용자 피드백: "또 pr템플릿에 맞게 안했네? ㅡㅡ"
+- ✅ 개선: **ALWAYS** `.github/pull_request_template.md` 확인 후 작성
+
+**2. GitHub Workflow 권한 문제**
+- ❌ 실수: PAT workflow scope 없이 워크플로우 파일 푸시
+- 🔍 원인: 권한 검증 없이 자동화 스크립트 추가
+- ✅ 개선: 워크플로우 파일 변경 시 권한 사전 확인
+
+**3. Copilot 리뷰 상세 확인 부족**
+- ❌ 실수: 구체적 코드 리뷰 코멘트 놓치고 일반 답변
+- 🔍 원인: API로 상세 코멘트 확인 없이 추측
+- 📝 사용자 피드백: "지금 코멘트 보면 코파일럿이 리뷰남긴거 있어 보고 답변해"
+- ✅ 개선: `gh api repos/.../pulls/.../comments` 필수 실행
+
+**4. 하드코딩된 경로 (이식성 문제)**
+- ❌ 실수: 절대 경로로 스크립트 작성
+- 🔍 원인: 개발 환경 기준으로만 고려
+- 🤖 Copilot 지적: "non-portable", "should use relative path"
+- ✅ 개선: `$(dirname "$0")` 패턴으로 동적 경로 사용
+
+**5. TypeScript 안전성 우회**
+- ❌ 실수: `!` 연산자로 타입 체크 우회
+- 🔍 원인: 편의성 우선으로 안전성 간과
+- 🤖 Copilot 지적: "bypasses TypeScript's safety checks"
+- ✅ 개선: `?? []` 패턴으로 안전한 fallback 사용
+
+### 🔒 **필수 검증 체크리스트**
+
+#### **PR 생성 전 체크리스트**
+- [ ] `.github/pull_request_template.md` 내용 확인
+- [ ] 하드코딩된 경로 없는지 확인: `grep -r "/Users/" . --exclude-dir=node_modules`
+- [ ] TypeScript non-null assertion 검사: `grep -r "\!" src/ --include="*.ts"`
+- [ ] 워크플로우 파일 변경 시 PAT workflow scope 확인
+- [ ] ESLint 에러 해결: `npm run lint`
+
+#### **코드 리뷰 응답 전 체크리스트**
+- [ ] `gh api repos/.../pulls/.../comments` API로 상세 코멘트 확인
+- [ ] 각 리뷰 코멘트의 구체적 제안사항 파악
+- [ ] 수정사항 테스트 후 응답
+- [ ] "Low Confidence" 코멘트도 별도 확인
+
+#### **스크립트 작성 체크리스트**
+- [ ] 절대 경로 사용 금지
+- [ ] `$(dirname "$0")` 패턴으로 동적 경로 사용
+- [ ] 다양한 환경에서 실행 가능한지 확인
+- [ ] 환경 변수 fallback 제공: `${VAR:-default}`
+
+### ⚡ **실시간 검증 명령어**
+
+```bash
+# PR 템플릿 확인
+cat .github/pull_request_template.md
+
+# 하드코딩 경로 검사
+grep -r "/Users/" . --exclude-dir=node_modules
+
+# Non-null assertion 검사
+grep -r "\!" src/ --include="*.ts" --include="*.tsx"
+
+# Copilot 리뷰 상세 확인
+gh api repos/owner/repo/pulls/PR_NUM/comments
+
+# 스크립트 이식성 테스트 (임시 디렉토리에서)
+cd /tmp && /path/to/script
+```
+
+### 📈 **지속적 개선 원칙**
+
+1. **실수 발생 시 즉시 문서화**: 패턴 분석 및 예방책 수립
+2. **자동화 우선**: 체크리스트를 스크립트로 자동화
+3. **사용자 피드백 최우선**: "내가 발견하기전에 너가 먼저알아야지"
+4. **이식성 고려**: 개발자 환경 의존성 최소화
+5. **안전성 우선**: 편의성보다 타입 안전성 우선
+
+### 🎯 **다음 Phase 적용사항**
+
+- Phase 2.2부터 위 체크리스트 **강제 적용**
+- 실수 발생 시 문서에 **즉시 추가**
+- 자동화 스크립트에 검증 로직 **필수 포함**
 
 ## Validation Pattern
 
