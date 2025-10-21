@@ -6,14 +6,14 @@
 set -e  # 에러 발생 시 스크립트 중단
 
 PHASE=$1
-FRONTEND_DIR="/Users/al03176821/sideproject/tab-nexus/frontend"
 
 if [ -z "$PHASE" ]; then
     echo "❌ Phase를 지정해주세요: red, green, refactor"
     exit 1
 fi
 
-cd "$FRONTEND_DIR"
+# 프로젝트 루트 기준으로 frontend 디렉토리로 이동
+cd "$(dirname "$0")/../frontend"
 
 echo "🔄 Phase: $PHASE 검증 시작..."
 
