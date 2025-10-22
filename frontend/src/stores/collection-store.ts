@@ -118,7 +118,7 @@ export const useCollectionStore = create<CollectionStore>()((set, get) => ({
         throw new CollectionError('동일한 제목의 컬렉션이 이미 존재합니다', 'DUPLICATE_TITLE')
       }
 
-      const now = new Date()
+      const now = Date.now()
       const newCollection: Collection = {
         id: generateId(),
         title: trimmedTitle,
@@ -181,7 +181,7 @@ export const useCollectionStore = create<CollectionStore>()((set, get) => ({
       newCollections.splice(toIndex, 0, movedCollection)
 
       // sortOrder 업데이트 및 타임스탬프 갱신
-      const now = new Date()
+      const now = Date.now()
       const updatedCollections = newCollections.map((collection: Collection, index: number) => ({
         ...collection,
         sortOrder: index,
@@ -224,7 +224,7 @@ export const useCollectionStore = create<CollectionStore>()((set, get) => ({
 
       const updatedCollections = collections.map((collection: Collection) =>
         collection.id === id
-          ? { ...collection, ...updates, updatedAt: new Date() }
+          ? { ...collection, ...updates, updatedAt: Date.now() }
           : collection
       )
 

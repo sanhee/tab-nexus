@@ -2,7 +2,7 @@
  * 로컬 스토리지 관리 유틸리티
  */
 
-import {
+import type {
   StorageData,
   StorageOptions,
   StorageResult,
@@ -11,12 +11,14 @@ import {
   ValidationResult,
   MigrationResult,
   StorageItem,
+} from '../types/storage';
+import {
   StorageError,
   StorageQuotaError,
   StorageMigrationError,
   StorageLockError,
-} from '@types/storage';
-import { Collection, Tab } from '@types/index';
+} from '../types/storage';
+import type { Collection } from '../types/index';
 
 // 내부 상태 관리
 const lockRegistry = new Map<string, number>();
@@ -516,7 +518,7 @@ export function decompressData(compressed: string): string {
     let decompressed = compressed;
 
     // 반복 패턴 복원
-    decompressed = decompressed.replace(/◊(\d+)◊(.+?)◊/g, (match, count, group) => {
+    decompressed = decompressed.replace(/◊(\d+)◊(.+?)◊/g, (_match, count, group) => {
       return group.repeat(parseInt(count, 10));
     });
 

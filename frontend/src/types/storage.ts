@@ -1,4 +1,4 @@
-import { Collection, Tab } from './index';
+import type { Collection, Tab } from './index';
 
 /**
  * 스토리지에 저장되는 메인 데이터 구조
@@ -175,13 +175,18 @@ export interface StorageEvent {
  * 커스텀 스토리지 에러 클래스
  */
 export class StorageError extends Error {
+  public code?: string;
+  public details?: Record<string, any>;
+
   constructor(
     message: string,
-    public code?: string,
-    public details?: Record<string, any>
+    code?: string,
+    details?: Record<string, any>
   ) {
     super(message);
     this.name = 'StorageError';
+    this.code = code;
+    this.details = details;
   }
 }
 
@@ -189,13 +194,18 @@ export class StorageError extends Error {
  * 스토리지 용량 부족 에러 클래스
  */
 export class StorageQuotaError extends StorageError {
+  public required: number;
+  public available: number;
+
   constructor(
     message: string,
-    public required: number,
-    public available: number
+    required: number,
+    available: number
   ) {
     super(message, 'QUOTA_EXCEEDED', { required, available });
     this.name = 'StorageQuotaError';
+    this.required = required;
+    this.available = available;
   }
 }
 
@@ -203,13 +213,18 @@ export class StorageQuotaError extends StorageError {
  * 스토리지 마이그레이션 에러 클래스
  */
 export class StorageMigrationError extends StorageError {
+  public fromVersion: string;
+  public toVersion: string;
+
   constructor(
     message: string,
-    public fromVersion: string,
-    public toVersion: string
+    fromVersion: string,
+    toVersion: string
   ) {
     super(message, 'MIGRATION_FAILED', { fromVersion, toVersion });
     this.name = 'StorageMigrationError';
+    this.fromVersion = fromVersion;
+    this.toVersion = toVersion;
   }
 }
 
@@ -217,8 +232,13 @@ export class StorageMigrationError extends StorageError {
  * 스토리지 락 에러 클래스
  */
 export class StorageLockError extends StorageError {
-  constructor(message: string, public key: string, public timeout: number) {
+  public key: string;
+  public timeout: number;
+
+  constructor(message: string, key: string, timeout: number) {
     super(message, 'LOCK_TIMEOUT', { key, timeout });
     this.name = 'StorageLockError';
+    this.key = key;
+    this.timeout = timeout;
   }
 }

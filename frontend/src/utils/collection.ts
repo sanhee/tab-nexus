@@ -73,7 +73,7 @@ export function createCollection(title: string, sortOrder = 0): Collection {
     throw new Error(titleValidation.errors[0]);
   }
 
-  const now = new Date();
+  const now = Date.now();
 
   return {
     id: generateCollectionId(),

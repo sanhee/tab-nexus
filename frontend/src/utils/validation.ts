@@ -58,12 +58,12 @@ export function typeCheck<T>(
 }
 
 /**
- * Date 객체 검증 규칙
+ * 타임스탬프 (숫자) 검증 규칙
  */
 export function dateCheck<T>(fieldName: string): ValidationRule<T> {
   return (value: T) => {
-    if (!(value instanceof Date)) {
-      return `${fieldName}는 Date 객체여야 합니다`;
+    if (typeof value !== 'number' || isNaN(value as number) || (value as number) <= 0) {
+      return `${fieldName}는 유효한 타임스탬프여야 합니다`;
     }
     return null;
   };

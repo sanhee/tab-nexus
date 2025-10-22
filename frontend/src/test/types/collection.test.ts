@@ -9,8 +9,8 @@ describe('컬렉션 타입 검증', () => {
       title: '개발 도구',
       isExpanded: true,
       sortOrder: 0,
-      createdAt: new Date('2024-10-19'),
-      updatedAt: new Date('2024-10-19'),
+      createdAt: new Date('2024-10-19').getTime(),
+      updatedAt: new Date('2024-10-19').getTime(),
     };
 
     const result = validateCollection(validCollection);
@@ -24,8 +24,8 @@ describe('컬렉션 타입 검증', () => {
       // title 누락
       isExpanded: true,
       sortOrder: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     } as Collection;
 
     const result = validateCollection(invalidCollection);
@@ -40,7 +40,7 @@ describe('컬렉션 타입 검증', () => {
       isExpanded: 'true', // boolean이어야 함
       sortOrder: '0', // number여야 함
       createdAt: '2024-10-19', // Date여야 함
-      updatedAt: new Date(),
+      updatedAt: Date.now(),
     } as unknown as Collection;
 
     const result = validateCollection(invalidCollection);
@@ -58,8 +58,10 @@ describe('컬렉션 생성', () => {
     expect(collection.title).toBe(title);
     expect(collection.isExpanded).toBe(false);
     expect(collection.sortOrder).toBe(0);
-    expect(collection.createdAt).toBeInstanceOf(Date);
-    expect(collection.updatedAt).toBeInstanceOf(Date);
+    expect(typeof collection.createdAt).toBe('number');
+    expect(typeof collection.updatedAt).toBe('number');
+    expect(collection.createdAt).toBeGreaterThan(0);
+    expect(collection.updatedAt).toBeGreaterThan(0);
   });
 
   test('빈 제목으로는 컬렉션을 생성할 수 없어야 한다', () => {
