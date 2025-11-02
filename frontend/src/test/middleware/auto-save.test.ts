@@ -1,14 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createAutoSaveMiddleware } from '@/middleware/auto-save';
-import type { StateCreator } from 'zustand';
-
-// Mock 스토어 타입
-interface TestStore {
-  data: string;
-  count: number;
-  updateData: (newData: string) => void;
-  increment: () => void;
-}
 
 describe('자동 저장 미들웨어', () => {
   let mockSaveFunction: ReturnType<typeof vi.fn>;
