@@ -14,9 +14,9 @@ describe('탭 타입 검증', () => {
       sortOrder: 0,
       type: 'link',
       tags: ['검색'],
-      createdAt: new Date('2024-10-19'),
-      updatedAt: new Date('2024-10-19'),
-      lastVisited: new Date('2024-10-19'),
+      createdAt: new Date('2024-10-19').getTime(),
+      updatedAt: new Date('2024-10-19').getTime(),
+      lastVisited: new Date('2024-10-19').getTime(),
     };
 
     const result = validateTab(validTab);
@@ -34,8 +34,8 @@ describe('탭 타입 검증', () => {
       type: 'note',
       noteContent: '중요한 메모입니다.',
       tags: ['메모'],
-      createdAt: new Date('2024-10-19'),
-      updatedAt: new Date('2024-10-19'),
+      createdAt: new Date('2024-10-19').getTime(),
+      updatedAt: new Date('2024-10-19').getTime(),
     };
 
     const result = validateTab(validNoteTab);
@@ -52,8 +52,8 @@ describe('탭 타입 검증', () => {
       sortOrder: 0,
       type: 'link',
       tags: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     } as unknown as Tab;
 
     const result = validateTab(invalidTab);
@@ -71,7 +71,7 @@ describe('탭 타입 검증', () => {
       type: 'invalid-type', // 'link' | 'note'여야 함
       tags: 'tag1,tag2', // string[]여야 함
       createdAt: '2024-10-19', // Date여야 함
-      updatedAt: new Date(),
+      updatedAt: Date.now(),
     } as unknown as Tab;
 
     const result = validateTab(invalidTab);
@@ -88,8 +88,8 @@ describe('탭 타입 검증', () => {
       sortOrder: 0,
       type: 'link',
       tags: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
 
     const result = validateTab(invalidLinkTab);
@@ -107,8 +107,8 @@ describe('탭 타입 검증', () => {
       type: 'note',
       // noteContent 누락
       tags: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
 
     const result = validateTab(invalidNoteTab);
@@ -135,8 +135,10 @@ describe('탭 생성', () => {
     expect(tab.type).toBe('link');
     expect(tab.sortOrder).toBe(0);
     expect(tab.tags).toEqual([]);
-    expect(tab.createdAt).toBeInstanceOf(Date);
-    expect(tab.updatedAt).toBeInstanceOf(Date);
+    expect(typeof tab.createdAt).toBe('number');
+    expect(typeof tab.updatedAt).toBe('number');
+    expect(tab.createdAt).toBeGreaterThan(0);
+    expect(tab.updatedAt).toBeGreaterThan(0);
   });
 
   test('노트 타입 탭을 생성할 수 있어야 한다', () => {
@@ -156,8 +158,10 @@ describe('탭 생성', () => {
     expect(tab.type).toBe('note');
     expect(tab.noteContent).toBe(tabData.noteContent);
     expect(tab.sortOrder).toBe(0);
-    expect(tab.createdAt).toBeInstanceOf(Date);
-    expect(tab.updatedAt).toBeInstanceOf(Date);
+    expect(typeof tab.createdAt).toBe('number');
+    expect(typeof tab.updatedAt).toBe('number');
+    expect(tab.createdAt).toBeGreaterThan(0);
+    expect(tab.updatedAt).toBeGreaterThan(0);
   });
 
   test('잘못된 URL로는 링크 탭을 생성할 수 없어야 한다', () => {

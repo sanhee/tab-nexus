@@ -26,7 +26,8 @@ describe('탭 스토어', () => {
       expect(tabs[0].url).toBe('https://google.com')
       expect(tabs[0].title).toBe('구글')
       expect(newTab.id).toBeDefined()
-      expect(newTab.createdAt).toBeInstanceOf(Date)
+      expect(typeof newTab.createdAt).toBe('number')
+      expect(newTab.createdAt).toBeGreaterThan(0)
     })
 
     test('잘못된 URL 형식일 때 오류가 발생한다', () => {

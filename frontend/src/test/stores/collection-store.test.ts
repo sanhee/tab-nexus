@@ -18,8 +18,10 @@ describe('컬렉션 스토어', () => {
       expect(collections[0]).toEqual(newCollection)
       expect(newCollection.title).toBe('새 컬렉션')
       expect(newCollection.id).toBeDefined()
-      expect(newCollection.createdAt).toBeInstanceOf(Date)
-      expect(newCollection.updatedAt).toBeInstanceOf(Date)
+      expect(typeof newCollection.createdAt).toBe('number')
+      expect(typeof newCollection.updatedAt).toBe('number')
+      expect(newCollection.createdAt).toBeGreaterThan(0)
+      expect(newCollection.updatedAt).toBeGreaterThan(0)
     })
 
     test('컬렉션 제목이 비어있으면 오류가 발생해야 한다', () => {
@@ -130,7 +132,7 @@ describe('컬렉션 스토어', () => {
 
       const collections = useCollectionStore.getState().collections
       expect(collections[0].title).toBe('수정된 제목')
-      expect(collections[0].updatedAt.getTime()).toBeGreaterThan(collection.updatedAt.getTime())
+      expect(collections[0].updatedAt).toBeGreaterThan(collection.updatedAt)
     })
 
     test('존재하지 않는 컬렉션을 수정하려 하면 오류가 발생해야 한다', () => {

@@ -112,7 +112,7 @@ export function createTab(data: CreateTabData): Tab {
   // 공통 검증 규칙을 사용한 입력 데이터 검증
   validateTabCreationData(data);
 
-  const now = new Date();
+  const now = Date.now();
 
   // 타입별 기본값 설정
   const tabData: Tab = {
@@ -252,8 +252,8 @@ export function isValidTabType(type: unknown): type is 'link' | 'note' {
 export function updateTabLastVisited(tab: Tab): Tab {
   return {
     ...tab,
-    lastVisited: new Date(),
-    updatedAt: new Date(),
+    lastVisited: Date.now(),
+    updatedAt: Date.now(),
   };
 }
 
@@ -268,7 +268,7 @@ export function updateTabTitle(tab: Tab, newTitle: string): Tab {
   return {
     ...tab,
     title: newTitle.trim(),
-    updatedAt: new Date(),
+    updatedAt: Date.now(),
   };
 }
 
@@ -283,6 +283,6 @@ export function updateTabTags(tab: Tab, tags: string[]): Tab {
   return {
     ...tab,
     tags: [...tags],
-    updatedAt: new Date(),
+    updatedAt: Date.now(),
   };
 }

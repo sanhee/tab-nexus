@@ -100,7 +100,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     // 탭 타입별 고급 검증 (URL, 중복)
     validateByTabType(input, input.collectionId, tabs)
 
-    const now = new Date()
+    const now = Date.now()
 
     // 해당 컬렉션의 탭 개수로 sortOrder 결정 (성능 최적화)
     let sortOrder = 0
@@ -149,7 +149,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
 
     // 성능 최적화: 삭제할 탭보다 높은 sortOrder를 가진 같은 컬렉션 탭들만 처리
     const updatedTabs: Tab[] = []
-    const now = new Date()
+    const now = Date.now()
     let reorderNeeded = false
 
     for (const tab of tabs) {
@@ -238,7 +238,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     updatedTabs[tabIndex] = {
       ...existingTab,
       ...processedUpdates,
-      updatedAt: new Date()
+      updatedAt: Date.now()
     }
 
     set({ tabs: updatedTabs })
@@ -268,7 +268,7 @@ export const useTabStore = create<TabStore>()((set, get) => ({
     newTabs.splice(toIndex, 0, movedTab)
 
     // 성능 최적화: sortOrder 업데이트 (변경된 탭들만)
-    const now = new Date()
+    const now = Date.now()
     const minIndex = Math.min(fromIndex, toIndex)
     const maxIndex = Math.max(fromIndex, toIndex)
 

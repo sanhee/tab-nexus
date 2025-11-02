@@ -2,14 +2,16 @@
 
 // Theme Types
 export * from './theme';
+// Storage Types
+export * from './storage';
 
 export interface Collection {
   id: string;
   title: string;
-  isExpanded: boolean;
+  isExpanded?: boolean;
   sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface Tab {
@@ -23,9 +25,9 @@ export interface Tab {
   type: 'link' | 'note';
   noteContent?: string;
   tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  lastVisited?: Date;
+  createdAt: number;
+  updatedAt: number;
+  lastVisited?: number;
 }
 
 export interface TabInput {
@@ -42,7 +44,7 @@ export interface Tag {
   id: string;
   name: string;
   color: TagColor;
-  createdAt: Date;
+  createdAt: number;
 }
 
 export type TagColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'gray';
