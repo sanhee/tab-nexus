@@ -67,13 +67,21 @@ export function createAutoSaveMiddleware<T>(
 
   /**
    * Deep comparison을 통한 상태 변경 감지
+   *
+   * @param {T} newState - 새로운 상태
+   * @returns {boolean} 상태가 변경되었는지 여부
    */
   function hasStateChanged(newState: T): boolean {
     if (!enableDeepCompare || previousState === null) {
       return true;
     }
 
-    return JSON.stringify(newState) !== JSON.stringify(previousState);
+    try {
+      return JSON.stringify(newState) !== JSON.stringify(previousState);
+    } catch {
+      // JSON 직렬화 실패 시 변경된 것으로 간주 (circular reference 등)
+      return true;
+    }
   }
 
   /**
