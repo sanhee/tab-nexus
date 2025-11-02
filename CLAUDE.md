@@ -29,6 +29,65 @@ git commit -m "feat: your changes"
 - `npm test -- src/test/specific.test.ts` - Run single test file
 - `git log --oneline -10` - Check recent commits for context
 
+### GitHub MCP Server Integration
+**IMPORTANT**: GitHub MCP 서버가 설치되어 있어 GitHub API 직접 사용 가능
+
+#### 필수 사용 시나리오
+1. **작업 시작 전**: 항상 관련 GitHub Issue 확인
+2. **PR 생성 시**: GitHub MCP로 PR 생성 및 관리
+3. **이슈 추적**: 진행 중인 이슈 상태 확인 및 업데이트
+4. **코드 리뷰**: Copilot 리뷰 요청 및 응답
+
+#### 주요 MCP 도구 사용법
+```bash
+# 1. 현재 저장소의 이슈 확인 (Phase별 이슈 추적)
+mcp__github__list_issues(owner="sanhee", repo="tab-nexus", state="OPEN")
+
+# 2. 특정 이슈 상세 확인
+mcp__github__get_issue(owner="sanhee", repo="tab-nexus", issue_number=N)
+
+# 3. PR 생성 (develop 브랜치로)
+mcp__github__create_pull_request(
+  owner="sanhee",
+  repo="tab-nexus",
+  title="[Phase X.Y]: Feature 완료 (TDD)",
+  head="feature/branch-name",
+  base="develop",
+  body="..."
+)
+
+# 4. Copilot 코드 리뷰 요청
+mcp__github__request_copilot_review(
+  owner="sanhee",
+  repo="tab-nexus",
+  pullNumber=N
+)
+
+# 5. PR 리뷰 코멘트 확인
+mcp__github__pull_request_read(
+  method="get_review_comments",
+  owner="sanhee",
+  repo="tab-nexus",
+  pullNumber=N
+)
+
+# 6. 이슈 업데이트 (작업 완료 시)
+mcp__github__update_issue(
+  owner="sanhee",
+  repo="tab-nexus",
+  issue_number=N,
+  state="closed",
+  state_reason="completed"
+)
+```
+
+#### MCP 사용 원칙
+- **작업 시작 시**: 해당 Phase의 이슈 확인 및 상태 파악
+- **커밋 전**: 이슈 번호 확인하여 `[#N]` 형식으로 커밋 메시지 작성
+- **PR 생성 시**: MCP로 PR 생성 후 Copilot 리뷰 즉시 요청
+- **리뷰 피드백 시**: MCP로 상세 코멘트 확인 후 응답
+- **작업 완료 시**: 이슈 상태를 "completed"로 업데이트
+
 ## Architecture Overview
 
 ### Project Structure
