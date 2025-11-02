@@ -1,5 +1,12 @@
 /**
- * 로컬 스토리지 관리 유틸리티
+ * @fileoverview 로컬 스토리지 관리 유틸리티
+ *
+ * 이 모듈은 브라우저의 localStorage와 sessionStorage를 추상화하여
+ * 타입 안전한 데이터 저장/로드, 압축, TTL, 백업, 마이그레이션 등의
+ * 고급 기능을 제공합니다.
+ *
+ * @module utils/storage
+ * @since 1.0.0
  */
 
 import type {
@@ -26,6 +33,25 @@ const compressionCache = new Map<string, string>();
 
 /**
  * 데이터를 스토리지에 저장
+ *
+ * @template T - 저장할 데이터의 타입 (기본값: StorageData)
+ * @param {string} key - 스토리지 키
+ * @param {T} data - 저장할 데이터
+ * @param {StorageOptions} options - 저장 옵션 (압축, TTL, 백업 등)
+ * @returns {StorageResult<T>} 저장 결과 및 메타데이터
+ *
+ * @example
+ * ```typescript
+ * const result = saveToStorage('user-data', { name: 'John' }, {
+ *   compress: true,
+ *   ttl: 3600000, // 1시간
+ *   createBackup: true
+ * });
+ *
+ * if (result.success) {
+ *   console.log('저장 완료:', result.metadata);
+ * }
+ * ```
  */
 export function saveToStorage<T = StorageData>(
   key: string,
@@ -126,6 +152,23 @@ export function saveToStorage<T = StorageData>(
 
 /**
  * 스토리지에서 데이터를 로드
+ *
+ * @template T - 로드할 데이터의 타입 (기본값: StorageData)
+ * @param {string} key - 스토리지 키
+ * @param {Partial<StorageOptions & { defaultData: T }>} options - 로드 옵션 (기본값, 백업 사용 등)
+ * @returns {StorageResult<T>} 로드 결과 및 데이터
+ *
+ * @example
+ * ```typescript
+ * const result = loadFromStorage('user-data', {
+ *   defaultData: { name: 'Guest' },
+ *   useBackup: false
+ * });
+ *
+ * if (result.success) {
+ *   console.log('데이터:', result.data);
+ * }
+ * ```
  */
 export function loadFromStorage<T = StorageData>(
   key: string,
@@ -463,6 +506,19 @@ export function migrateStorageData(
 
 /**
  * 데이터 압축
+ *
+ * 간단한 패턴 치환 및 반복 문자열 압축을 통해 데이터 크기를 줄입니다.
+ * 실제 프로덕션 환경에서는 LZ 알고리즘이나 zlib를 사용하는 것을 권장합니다.
+ *
+ * @param {string} data - 압축할 문자열 데이터
+ * @returns {string} 압축된 문자열
+ *
+ * @example
+ * ```typescript
+ * const original = JSON.stringify({ collections: [], tabs: [] });
+ * const compressed = compressData(original);
+ * console.log('압축률:', compressed.length / original.length);
+ * ```
  */
 export function compressData(data: string): string {
   // 간단한 압축 시뮬레이션 (실제로는 LZ 알고리즘 등을 사용)
@@ -512,6 +568,18 @@ export function compressData(data: string): string {
 
 /**
  * 데이터 압축 해제
+ *
+ * compressData()로 압축된 데이터를 원본 형태로 복원합니다.
+ *
+ * @param {string} compressed - 압축된 문자열 데이터
+ * @returns {string} 압축 해제된 원본 문자열
+ * @throws {Error} 압축 해제 실패 시
+ *
+ * @example
+ * ```typescript
+ * const decompressed = decompressData(compressedData);
+ * const data = JSON.parse(decompressed);
+ * ```
  */
 export function decompressData(compressed: string): string {
   try {
